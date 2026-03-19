@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import BalanceCards from './components/BalanceCards';
 import TransactionList from './components/TransactionList';
-import AssetExplorer from './components/AssetExplorer';
-import TravelExpenses from './components/TravelExpenses';
+import RecentExpenses from './components/RecentExpenses';
 import RefreshTimer from './components/RefreshTimer';
 import { wallbitData } from './data/mockData';
 
@@ -18,10 +17,9 @@ interface DashboardData {
     currency: string; 
     assets: { symbol: string; shares: string }[];
   };
-  brazilTrip: {
+  recentExpenses: {
     title: string;
     subtitle: string;
-    dateRange: string;
     totalSpent: string;
     currency: string;
     transactions: any[];
@@ -33,8 +31,20 @@ interface DashboardData {
   };
 }
 
+// Initial state mapping from sanitized mockData
+const initialState: DashboardData = {
+  ...wallbitData as any,
+  recentExpenses: {
+    title: "Gastos últimos 30 días",
+    subtitle: "Consumo total (USD)",
+    totalSpent: "0.00",
+    currency: "USD",
+    transactions: []
+  }
+};
+
 function App() {
-  const [data, setData] = useState<DashboardData>(wallbitData as unknown as DashboardData);
+  const [data, setData] = useState<DashboardData>(initialState);
 
   // Fetch initial data from cache server
   useEffect(() => {
@@ -58,12 +68,6 @@ function App() {
       
       if (!result.ok) {
         const errorData = await result.json();
-        console.error('API Error:', {
-          status: result.status,
-          error: errorData.error,
-          message: errorData.message,
-          code: errorData.code
-        });
         throw { code: errorData.code, status: result.status };
       }
 
@@ -96,8 +100,7 @@ function App() {
       </header>
 
       <BalanceCards checking={data.checking} stocks={data.stocks} />
-      <TravelExpenses brazilTrip={data.brazilTrip} />
-      <AssetExplorer assets={data.stocks.assets} />
+      <RecentExpenses data={data.recentExpenses} />
       <TransactionList transactions={data.transactions} />
 
       <footer style={{ marginTop: '4rem', opacity: 0.3, textAlign: 'center', fontSize: '0.8rem' }}>

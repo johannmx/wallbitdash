@@ -8,7 +8,7 @@ type Transaction = {
   currency: string;
   status: string;
   date: string;
-  description?: string; // New Optional Field
+  description?: string;
 };
 
 interface TransactionListProps {
@@ -20,6 +20,11 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState<keyof Transaction>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  const isExpense = (type: string) => {
+    const t = type.toLowerCase();
+    return t.includes('spent') || t.includes('qr') || t.includes('transfer_out') || t.includes('withdrawal') || t === 'internal_transfer';
+  };
 
   const filteredTransactions = useMemo(() => {
     let txs = [...transactions];
@@ -45,9 +50,7 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
         return sortOrder === 'asc' ? parseFloat(aVal) - parseFloat(bVal) : parseFloat(bVal) - parseFloat(aVal);
       }
       return sortOrder === 'asc' 
-        ? aVal.localeCompare(bVal) 
-        ? aVal.localeCompare(bVal) // Wait, fix nesting
-        : aVal.localeCompare(bVal) // Fix
+        ? aVal.localeCompare(bVal)
         : bVal.localeCompare(aVal);
     });
 
@@ -119,43 +122,49 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
             </tr>
           </thead>
           <tbody>
-            {filteredTransactions.map((tx) => (
-              <tr key={tx.uuid} className="tx-row" style={{ 
-                background: 'rgba(255,255,255,0.02)',
-                borderRadius: '1rem'
-              }}>
-                <td style={{ padding: '1rem', borderTopLeftRadius: '1rem', borderBottomLeftRadius: '1rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
-                  {new Date(tx.date + 'T00:00:00Z').toLocaleDateString('es-ES', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                  })}
-                </td>
-                <td style={{ fontSize: '0.9rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {tx.description || '-'}
-                </td>
-                <td style={{ textTransform: 'capitalize', fontSize: '0.85rem', opacity: 0.7 }}>
-                  {tx.type.replace(/_/g, ' ').toLowerCase()}
-                </td>
-                <td style={{ fontWeight: 600 }}>
-                   ${tx.amount} {tx.currency}
-                </td>
-                <td style={{ borderTopRightRadius: '1rem', borderBottomRightRadius: '1rem' }}>
-                  <span style={{ 
-                    fontSize: '0.7rem', 
-                    padding: '0.25rem 0.6rem', 
-                    borderRadius: '2rem',
-                    background: `${getStatusColor(tx.status)}20`,
-                    color: getStatusColor(tx.status),
-                    border: `1px solid ${getStatusColor(tx.status)}40`,
-                    fontWeight: 600,
-                    textTransform: 'uppercase'
+            {filteredTransactions.map((tx) => {
+              const expense = isExpense(tx.type);
+              return (
+                <tr key={tx.uuid} className="tx-row" style={{ 
+                  background: 'rgba(255,255,255,0.02)',
+                  borderRadius: '1rem'
+                }}>
+                  <td style={{ padding: '1rem', borderTopLeftRadius: '1rem', borderBottomLeftRadius: '1rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                    {new Date(tx.date + 'T00:00:00Z').toLocaleDateString('es-ES', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric'
+                    })}
+                  </td>
+                  <td style={{ fontSize: '0.9rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {tx.description || '-'}
+                  </td>
+                  <td style={{ textTransform: 'capitalize', fontSize: '0.85rem', opacity: 0.7 }}>
+                    {tx.type.replace(/_/g, ' ').toLowerCase()}
+                  </td>
+                  <td style={{ 
+                    fontWeight: 700, 
+                    color: expense ? 'hsl(var(--error))' : 'hsl(var(--success))'
                   }}>
-                    {tx.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
+                    {expense ? '-' : '+'}${tx.amount} <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>{tx.currency}</span>
+                  </td>
+                  <td style={{ borderTopRightRadius: '1rem', borderBottomRightRadius: '1rem' }}>
+                    <span style={{ 
+                      fontSize: '0.7rem', 
+                      padding: '0.25rem 0.6rem', 
+                      borderRadius: '2rem',
+                      background: `${getStatusColor(tx.status)}20`,
+                      color: getStatusColor(tx.status),
+                      border: `1px solid ${getStatusColor(tx.status)}40`,
+                      fontWeight: 600,
+                      textTransform: 'uppercase'
+                    }}>
+                      {tx.status}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
