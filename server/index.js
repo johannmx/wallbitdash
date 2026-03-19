@@ -27,6 +27,7 @@ const app = express();
 const PORT = 3001;
 const DATA_PATH = process.env.DATA_PATH || path.join(__dirname, '../data/data.json');
 const API_KEY = process.env.WALLBIT_API_KEY;
+const API_BASE = 'https://api.wallbit.io/api/public/v1';
 
 app.use(cors());
 app.use(express.json());
@@ -44,7 +45,7 @@ let cache = dataTemplate;
 if (fs.existsSync(DATA_PATH)) {
   try {
     const savedData = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'));
-    cache = savedData;
+    cache = { ...dataTemplate, ...savedData };
     console.log('✅ Loaded data from persistence.');
   } catch (e) {
     console.warn('⚠️ Could not load persistence file, starting fresh.');
@@ -67,31 +68,48 @@ const fetchWallbitData = async () => {
     return;
   }
 
+  const headers = { 'X-API-Key': API_KEY };
   console.log('🔄 Refreshing data from Wallbit API...');
+
   try {
-    // 1. Fetch Transactions
-    const txRes = await fetch('https://api.wallbit.io/v1/transactions', {
-      headers: { 'Authorization': `Bearer ${API_KEY}` }
-    });
-    
+    // 1. Fetch Checking Balance
+    const checkingRes = await fetch(`${API_BASE}/balance/checking`, { headers });
+    if (checkingRes.ok) {
+      const { data } = await checkingRes.json();
+      cache.checking = { balance: data.balance, currency: data.currency };
+    }
+
+    // 2. Fetch Stocks Balance
+    const stocksRes = await fetch(`${API_BASE}/balance/stocks`, { headers });
+    if (stocksRes.ok) {
+      const { data } = await stocksRes.json();
+      cache.stocks = { 
+        balance: data.balance, 
+        currency: data.currency,
+        assets: data.assets || [] 
+      };
+    }
+
+    // 3. Fetch Transactions
+    const txRes = await fetch(`${API_BASE}/transactions`, { headers });
     if (!txRes.ok) throw new Error(`API Error: ${txRes.status}`);
     
     const { data: txList } = await txRes.json();
     
-    // 2. Map Transactions
-    const mappedTxs = txList.data.map(tx => ({
+    // Process Transactions (List can be paginated, for now we take the first page)
+    const txs = Array.isArray(txList) ? txList : (txList.data || []);
+
+    const mappedTxs = txs.map(tx => ({
       uuid: tx.uuid,
       type: tx.type,
-      amount: tx.source_amount,
-      currency: tx.source_currency.code,
-      dest_amount: tx.dest_amount,
-      dest_currency: tx.dest_currency.code,
+      amount: tx.source_amount || tx.amount,
+      currency: (tx.source_currency?.code || tx.currency || 'USD'),
       status: tx.status,
-      date: tx.created_at.split('T')[0],
-      description: (tx.external_address || tx.comment || '').trim()
+      date: (tx.created_at || tx.date).split('T')[0],
+      description: (tx.external_address || tx.comment || tx.description || '').trim()
     }));
 
-    // 3. Process Brazil Trip logic
+    // 4. Process Brazil Trip logic
     const brazilTxs = mappedTxs.filter(tx => {
        const d = new Date(tx.date);
        const start = new Date('2025-10-27');
@@ -101,14 +119,14 @@ const fetchWallbitData = async () => {
 
     const totalBrazil = brazilTxs.reduce((sum, tx) => sum + parseFloat(tx.amount), 0).toFixed(2);
 
-    // 4. Update Cache
+    // 5. Update Cache
     cache.transactions = mappedTxs;
     cache.brazilTrip.transactions = brazilTxs;
     cache.brazilTrip.totalSpent = totalBrazil;
     cache.lastUpdated = new Date().toISOString();
 
     saveToPersistence();
-    console.log(`✅ Success: Fetched ${mappedTxs.length} transactions.`);
+    console.log(`✅ Success: Updated balances and ${mappedTxs.length} transactions.`);
 
   } catch (error) {
     console.error('❌ Wallbit API Fetch Failed:', error.message);
