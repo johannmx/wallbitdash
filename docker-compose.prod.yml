@@ -1,0 +1,26 @@
+services:
+  frontend:
+    image: ghcr.io/johannmx/wallbitdash-frontend:latest
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - wallbit-net
+
+  backend:
+    image: ghcr.io/johannmx/wallbitdash-backend:latest
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - WALLBIT_API_KEY=${WALLBIT_API_KEY}
+      - DATA_PATH=/app/data/data.json
+    volumes:
+      - /var/lib/wallbitdash/data:/app/data
+    networks:
+      - wallbit-net
+
+networks:
+  wallbit-net:
+    driver: bridge

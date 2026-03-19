@@ -1,0 +1,30 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - wallbit-net
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - WALLBIT_API_KEY=${WALLBIT_API_KEY}
+      - DATA_PATH=/app/data/data.json
+    volumes:
+      - ./backend-data:/app/data
+    networks:
+      - wallbit-net
+
+networks:
+  wallbit-net:
+    driver: bridge
