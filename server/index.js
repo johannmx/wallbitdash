@@ -62,6 +62,44 @@ const saveToPersistence = () => {
 };
 
 // --- Wallbit API Helpers ---
+
+const fetchAllTransactions = async (headers) => {
+  let allTransactions = [];
+  let page = 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    console.log(`⏳ Fetching transactions page ${page}...`);
+    const res = await fetch(`${API_BASE}/transactions?page=${page}`, { headers });
+    
+    if (!res.ok) {
+      console.error(`❌ Error fetching page ${page}: ${res.status}`);
+      break;
+    }
+
+    const { data } = await res.json();
+    const txs = Array.isArray(data) ? data : (data.data || []);
+
+    if (txs.length === 0) {
+      hasMore = false;
+    } else {
+      allTransactions = [...allTransactions, ...txs];
+      // If we got exactly 10 (or whatever the limit is) and there's no explicit total_pages, we try next
+      // However, usually we can check if we received less than the default limit
+      if (txs.length < 10) {
+        hasMore = false;
+      } else {
+        page++;
+      }
+    }
+    
+    // Safety limit to avoid infinite loops
+    if (page > 30) hasMore = false;
+  }
+
+  return allTransactions;
+};
+
 const fetchWallbitData = async () => {
   if (!API_KEY) {
     console.warn('⚠️ No WALLBIT_API_KEY provided. Skipping refresh.');
@@ -90,15 +128,10 @@ const fetchWallbitData = async () => {
       };
     }
 
-    // 3. Fetch Transactions
-    const txRes = await fetch(`${API_BASE}/transactions`, { headers });
-    if (!txRes.ok) throw new Error(`API Error: ${txRes.status}`);
+    // 3. Fetch ALL Transactions (Paginated)
+    const txs = await fetchAllTransactions(headers);
     
-    const { data: txList } = await txRes.json();
-    
-    // Process Transactions (List can be paginated, for now we take the first page)
-    const txs = Array.isArray(txList) ? txList : (txList.data || []);
-
+    // 4. Map Transactions
     const mappedTxs = txs.map(tx => ({
       uuid: tx.uuid,
       type: tx.type,
@@ -109,7 +142,7 @@ const fetchWallbitData = async () => {
       description: (tx.external_address || tx.comment || tx.description || '').trim()
     }));
 
-    // 4. Process Brazil Trip logic
+    // 5. Process Brazil Trip logic
     const brazilTxs = mappedTxs.filter(tx => {
        const d = new Date(tx.date);
        const start = new Date('2025-10-27');
@@ -119,7 +152,7 @@ const fetchWallbitData = async () => {
 
     const totalBrazil = brazilTxs.reduce((sum, tx) => sum + parseFloat(tx.amount), 0).toFixed(2);
 
-    // 5. Update Cache
+    // 6. Update Cache
     cache.transactions = mappedTxs;
     cache.brazilTrip.transactions = brazilTxs;
     cache.brazilTrip.totalSpent = totalBrazil;
