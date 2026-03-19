@@ -47,7 +47,9 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
       const bVal = (b[sortField] || '').toString();
       
       if (sortField === 'amount') {
-        return sortOrder === 'asc' ? parseFloat(aVal) - parseFloat(bVal) : parseFloat(bVal) - parseFloat(aVal);
+        const amtA = parseFloat(aVal) || 0;
+        const amtB = parseFloat(bVal) || 0;
+        return sortOrder === 'asc' ? amtA - amtB : amtB - amtA;
       }
       return sortOrder === 'asc' 
         ? aVal.localeCompare(bVal)
@@ -67,9 +69,11 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status.toUpperCase()) {
       case 'COMPLETED': return 'hsl(var(--success))';
-      case 'FAILED': return 'hsl(var(--error))';
+      case 'FAILED': return 'rgba(255, 255, 255, 0.4)'; // Gray for failed
+      case 'DECLINED': return 'rgba(255, 255, 255, 0.4)';
+      case 'EXPIRED': return 'rgba(255, 255, 255, 0.4)';
       default: return 'hsl(var(--warning))';
     }
   };
@@ -124,10 +128,14 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
           <tbody>
             {filteredTransactions.map((tx) => {
               const expense = isExpense(tx.type);
+              const failed = tx.status === 'FAILED' || tx.status === 'DECLINED' || tx.status === 'EXPIRED';
+              const statusColor = getStatusColor(tx.status);
+
               return (
                 <tr key={tx.uuid} className="tx-row" style={{ 
                   background: 'rgba(255,255,255,0.02)',
-                  borderRadius: '1rem'
+                  borderRadius: '1rem',
+                  opacity: failed ? 0.6 : 1
                 }}>
                   <td style={{ padding: '1rem', borderTopLeftRadius: '1rem', borderBottomLeftRadius: '1rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
                     {new Date(tx.date + 'T00:00:00Z').toLocaleDateString('es-ES', {
@@ -144,7 +152,7 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
                   </td>
                   <td style={{ 
                     fontWeight: 700, 
-                    color: expense ? 'hsl(var(--error))' : 'hsl(var(--success))'
+                    color: failed ? '#888' : (expense ? 'hsl(var(--error))' : 'hsl(var(--success))')
                   }}>
                     {expense ? '-' : '+'}${tx.amount} <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>{tx.currency}</span>
                   </td>
@@ -153,9 +161,9 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
                       fontSize: '0.7rem', 
                       padding: '0.25rem 0.6rem', 
                       borderRadius: '2rem',
-                      background: `${getStatusColor(tx.status)}20`,
-                      color: getStatusColor(tx.status),
-                      border: `1px solid ${getStatusColor(tx.status)}40`,
+                      background: failed ? 'rgba(255,255,255,0.05)' : `${statusColor}20`,
+                      color: failed ? '#888' : statusColor,
+                      border: `1px solid ${failed ? 'rgba(255,255,255,0.1)' : statusColor + '40'}`,
                       fontWeight: 600,
                       textTransform: 'uppercase'
                     }}>

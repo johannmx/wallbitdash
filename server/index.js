@@ -44,14 +44,6 @@ let cache = dataTemplate;
 if (fs.existsSync(DATA_PATH)) {
   try {
     const savedData = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'));
-    // Migration: rename brazilTrip to recentExpenses if old data exists
-    if (savedData.brazilTrip) {
-      savedData.recentExpenses = {
-        ...dataTemplate.recentExpenses,
-        transactions: savedData.brazilTrip.transactions || []
-      };
-      delete savedData.brazilTrip;
-    }
     cache = { ...dataTemplate, ...savedData };
     console.log('✅ Loaded data from persistence.');
   } catch (e) {
@@ -77,11 +69,7 @@ const fetchAllTransactions = async (headers) => {
 
   while (hasMore) {
     const res = await fetch(`${API_BASE}/transactions?page=${page}`, { headers });
-    
-    if (!res.ok) {
-      console.error(`❌ Error fetching page ${page}: ${res.status}`);
-      break;
-    }
+    if (!res.ok) break;
 
     const json = await res.json();
     const txs = Array.isArray(json.data) ? json.data : (json.data?.data || []);
@@ -109,46 +97,42 @@ const fetchDolarRate = async () => {
       const data = await res.json();
       return data.venta;
     }
-  } catch (e) {
-    console.warn('⚠️ Could not fetch ARS/USD rate, using fallback 1000.');
-  }
+  } catch (e) {}
   return 1000;
 };
 
 const fetchWallbitData = async () => {
-  if (!API_KEY) {
-    console.warn('⚠️ No WALLBIT_API_KEY provided.');
-    return;
-  }
+  if (!API_KEY) return;
 
   const headers = { 'X-API-Key': API_KEY };
   console.log('🔄 Refreshing data from Wallbit API...');
 
   try {
     const arsRate = await fetchDolarRate();
-    console.log(`💵 Current ARS/USD Rate: ${arsRate}`);
 
-    // 1. Fetch Checking Balance
+    // 1. Fetch Checking Balance (Returns Array)
     const checkingRes = await fetch(`${API_BASE}/balance/checking`, { headers });
     if (checkingRes.ok) {
       const json = await checkingRes.json();
-      const item = json.data;
-      cache.checking = { balance: item.balance || "0.00", currency: item.currency || "USD" };
+      const item = (json.data && json.data[0]) || { balance: "0.00", currency: "USD" };
+      cache.checking = { balance: item.balance, currency: item.currency };
+      console.log(`🏦 Checking: ${item.balance} ${item.currency}`);
     }
 
-    // 2. Fetch Stocks Balance
+    // 2. Fetch Stocks Balance (Returns Array)
     const stocksRes = await fetch(`${API_BASE}/balance/stocks`, { headers });
     if (stocksRes.ok) {
       const json = await stocksRes.json();
-      const item = json.data;
+      const item = (json.data && json.data[0]) || { shares: "0.00", symbol: "USD" };
       cache.stocks = { 
-        balance: item.balance || "0.00", 
-        currency: item.currency || "USD",
-        assets: item.assets || [] 
+        balance: item.shares || item.balance || "0.00", 
+        currency: item.symbol || item.currency || "USD",
+        assets: json.data || [] 
       };
+      console.log(`📈 Stocks: ${cache.stocks.balance} ${cache.stocks.currency}`);
     }
 
-    // 3. Fetch ALL Transactions (Paginated)
+    // 3. Fetch ALL Transactions
     const txsRaw = await fetchAllTransactions(headers);
     
     // 4. Map Transactions
@@ -170,17 +154,13 @@ const fetchWallbitData = async () => {
     
     const recentExpenses = mappedTxs.filter(tx => {
        const d = new Date(tx.date);
-       // Check if it's an expense (approx logic)
        const isExpense = expenseTypes.includes(tx.type.toLowerCase()) || tx.type.toLowerCase().includes('spent');
-       return d >= thirtyDaysAgo && isExpense;
+       return d >= thirtyDaysAgo && isExpense && tx.status === 'COMPLETED';
     }).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-    // Calculate total in USD
     const totalInUSD = recentExpenses.reduce((sum, tx) => {
       let val = parseFloat(tx.amount);
-      if (tx.currency === 'ARS') {
-        val = val / arsRate;
-      }
+      if (tx.currency === 'ARS') val /= arsRate;
       return sum + val;
     }, 0).toFixed(2);
 
@@ -194,17 +174,14 @@ const fetchWallbitData = async () => {
     cache.lastUpdated = new Date().toISOString();
 
     saveToPersistence();
-    console.log(`✅ Success: Updated balances and ${mappedTxs.length} transactions (${recentExpenses.length} recent).`);
+    console.log(`✅ Success: Aggregated ${mappedTxs.length} transactions total.`);
 
   } catch (error) {
     console.error('❌ Wallbit API Fetch Failed:', error.message);
   }
 };
 
-// background cron
 cron.schedule('*/15 * * * *', fetchWallbitData);
-
-// Initial fetch on start
 fetchWallbitData();
 
 app.get('/api/dashboard', (req, res) => {
@@ -219,5 +196,4 @@ app.get('/api/dashboard', (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Cache Server running at http://0.0.0.0:${PORT}`);
-  console.log(`📂 Persistence Path: ${DATA_PATH}`);
 });
