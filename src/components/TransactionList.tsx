@@ -69,12 +69,15 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status.toUpperCase()) {
+    const s = status.toUpperCase();
+    switch (s) {
       case 'COMPLETED': return 'hsl(var(--success))';
-      case 'FAILED': return 'rgba(255, 255, 255, 0.4)'; // Gray for failed
-      case 'DECLINED': return 'rgba(255, 255, 255, 0.4)';
-      case 'EXPIRED': return 'rgba(255, 255, 255, 0.4)';
-      default: return 'hsl(var(--warning))';
+      case 'PENDING': return 'hsl(var(--warning))'; // Amber
+      case 'REVERSED': return '#818cf8'; // Indigo/Purple
+      case 'FAILED':
+      case 'DECLINED':
+      case 'EXPIRED': return 'rgba(255, 255, 255, 0.4)'; // Gray
+      default: return 'hsl(var(--foreground))';
     }
   };
 
@@ -128,14 +131,22 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
           <tbody>
             {filteredTransactions.map((tx) => {
               const expense = isExpense(tx.type);
-              const failed = tx.status === 'FAILED' || tx.status === 'DECLINED' || tx.status === 'EXPIRED';
+              const statusUpper = tx.status.toUpperCase();
+              const isFailed = ['FAILED', 'DECLINED', 'EXPIRED'].includes(statusUpper);
+              const isPending = statusUpper === 'PENDING';
+              const isReversed = statusUpper === 'REVERSED';
               const statusColor = getStatusColor(tx.status);
+
+              let amountColor = expense ? 'hsl(var(--error))' : 'hsl(var(--success))';
+              if (isFailed) amountColor = '#888';
+              if (isPending) amountColor = 'hsl(var(--warning))';
+              if (isReversed) amountColor = '#818cf8';
 
               return (
                 <tr key={tx.uuid} className="tx-row" style={{ 
                   background: 'rgba(255,255,255,0.02)',
                   borderRadius: '1rem',
-                  opacity: failed ? 0.6 : 1
+                  opacity: isFailed ? 0.6 : 1
                 }}>
                   <td style={{ padding: '1rem', borderTopLeftRadius: '1rem', borderBottomLeftRadius: '1rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
                     {new Date(tx.date + 'T00:00:00Z').toLocaleDateString('es-ES', {
@@ -152,7 +163,7 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
                   </td>
                   <td style={{ 
                     fontWeight: 700, 
-                    color: failed ? '#888' : (expense ? 'hsl(var(--error))' : 'hsl(var(--success))')
+                    color: amountColor
                   }}>
                     {expense ? '-' : '+'}${tx.amount} <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>{tx.currency}</span>
                   </td>
@@ -161,10 +172,10 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
                       fontSize: '0.7rem', 
                       padding: '0.25rem 0.6rem', 
                       borderRadius: '2rem',
-                      background: failed ? 'rgba(255,255,255,0.05)' : `${statusColor}20`,
-                      color: failed ? '#888' : statusColor,
-                      border: `1px solid ${failed ? 'rgba(255,255,255,0.1)' : statusColor + '40'}`,
-                      fontWeight: 600,
+                      background: isFailed ? 'rgba(255,255,255,0.05)' : `${statusColor}20`,
+                      color: statusColor,
+                      border: `1px solid ${isFailed ? 'rgba(255,255,255,0.1)' : statusColor + '40'}`,
+                      fontWeight: 700,
                       textTransform: 'uppercase'
                     }}>
                       {tx.status}

@@ -13,7 +13,7 @@ const dataTemplate = {
   checking: { balance: "0.00", currency: "USD" },
   stocks: { balance: "0.00", currency: "USD", assets: [] },
   recentExpenses: {
-    title: "Gastos últimos 30 días",
+    title: "Gastos últimos 7 días",
     subtitle: "Consumo total (USD)",
     totalSpent: "0.00",
     currency: "USD",
@@ -110,16 +110,15 @@ const fetchWallbitData = async () => {
   try {
     const arsRate = await fetchDolarRate();
 
-    // 1. Fetch Checking Balance (Returns Array)
+    // 1. Fetch Checking Balance
     const checkingRes = await fetch(`${API_BASE}/balance/checking`, { headers });
     if (checkingRes.ok) {
       const json = await checkingRes.json();
       const item = (json.data && json.data[0]) || { balance: "0.00", currency: "USD" };
       cache.checking = { balance: item.balance, currency: item.currency };
-      console.log(`🏦 Checking: ${item.balance} ${item.currency}`);
     }
 
-    // 2. Fetch Stocks Balance (Returns Array)
+    // 2. Fetch Stocks Balance
     const stocksRes = await fetch(`${API_BASE}/balance/stocks`, { headers });
     if (stocksRes.ok) {
       const json = await stocksRes.json();
@@ -129,7 +128,6 @@ const fetchWallbitData = async () => {
         currency: item.symbol || item.currency || "USD",
         assets: json.data || [] 
       };
-      console.log(`📈 Stocks: ${cache.stocks.balance} ${cache.stocks.currency}`);
     }
 
     // 3. Fetch ALL Transactions
@@ -146,16 +144,16 @@ const fetchWallbitData = async () => {
       description: (tx.external_address || tx.comment || tx.description || '').trim()
     }));
 
-    // 5. Process Recent Expenses (Last 30 days)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    // 5. Process Recent Expenses (Last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     const expenseTypes = ['card_spent', 'pay_qr', 'internal_transfer', 'wire_transfer_out', 'withdrawal'];
     
     const recentExpenses = mappedTxs.filter(tx => {
        const d = new Date(tx.date);
        const isExpense = expenseTypes.includes(tx.type.toLowerCase()) || tx.type.toLowerCase().includes('spent');
-       return d >= thirtyDaysAgo && isExpense && tx.status === 'COMPLETED';
+       return d >= sevenDaysAgo && isExpense && (tx.status === 'COMPLETED' || tx.status === 'PENDING');
     }).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const totalInUSD = recentExpenses.reduce((sum, tx) => {
@@ -167,14 +165,16 @@ const fetchWallbitData = async () => {
     // 6. Update Cache
     cache.transactions = mappedTxs;
     cache.recentExpenses = {
-      ...dataTemplate.recentExpenses,
+      title: "Gastos últimos 7 días",
+      subtitle: "Consumo total (USD)",
       totalSpent: totalInUSD,
+      currency: "USD",
       transactions: recentExpenses
     };
     cache.lastUpdated = new Date().toISOString();
 
     saveToPersistence();
-    console.log(`✅ Success: Aggregated ${mappedTxs.length} transactions total.`);
+    console.log(`✅ Success: Aggregated ${mappedTxs.length} transactions (${recentExpenses.length} recent 7-day).`);
 
   } catch (error) {
     console.error('❌ Wallbit API Fetch Failed:', error.message);

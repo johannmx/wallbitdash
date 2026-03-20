@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import BalanceCards from './components/BalanceCards';
 import TransactionList from './components/TransactionList';
 import RecentExpenses from './components/RecentExpenses';
+import AnalyticsCards from './components/AnalyticsCards';
 import RefreshTimer from './components/RefreshTimer';
 import { wallbitData } from './data/mockData';
 
@@ -31,11 +32,10 @@ interface DashboardData {
   };
 }
 
-// Initial state mapping from sanitized mockData
 const initialState: DashboardData = {
   ...wallbitData as any,
   recentExpenses: {
-    title: "Gastos últimos 30 días",
+    title: "Gastos últimos 7 días",
     subtitle: "Consumo total (USD)",
     totalSpent: "0.00",
     currency: "USD",
@@ -65,18 +65,12 @@ function App() {
   const handleRefresh = async () => {
     try {
       const result = await fetch(API_URL);
-      
-      if (!result.ok) {
-        const errorData = await result.json();
-        throw { code: errorData.code, status: result.status };
-      }
-
+      if (!result.ok) throw new Error('Refesh failed');
       const freshData = await result.json();
       setData({ ...freshData });
       return true;
-
-    } catch (error: any) {
-      console.error('Fetch Error:', error);
+    } catch (error) {
+      console.error('Refresh Error:', error);
       throw error; 
     }
   };
@@ -88,7 +82,7 @@ function App() {
           <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
             Hola, <span className="gradient-text">Johann</span>
           </h1>
-          <p style={{ opacity: 0.6 }}>Bienvenido de vuelta a tu Wallbit Dashboard.</p>
+          <p style={{ opacity: 0.6 }}>Análisis de finanzas personales en tiempo real.</p>
         </div>
         
         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
@@ -101,6 +95,7 @@ function App() {
 
       <BalanceCards checking={data.checking} stocks={data.stocks} />
       <RecentExpenses data={data.recentExpenses} />
+      <AnalyticsCards transactions={data.transactions} />
       <TransactionList transactions={data.transactions} />
 
       <footer style={{ marginTop: '4rem', opacity: 0.3, textAlign: 'center', fontSize: '0.8rem' }}>
