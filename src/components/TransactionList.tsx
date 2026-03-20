@@ -55,7 +55,7 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
         : bVal.localeCompare(aVal);
     });
 
-    return txs.slice(0, 10); // Always show up to 10
+    return txs; // Return all records for scrollable view
   }, [search, sortField, sortOrder, transactions]);
 
   const handleSort = (field: keyof Transaction) => {
@@ -81,9 +81,12 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
   };
 
   return (
-    <div className="glass animate-in stagger-4" style={{ marginTop: '2rem', padding: '2rem' }}>
+    <div className="glass transaction-list-container animate-in stagger-4" style={{ marginTop: '2rem', padding: '2rem', transition: 'all 0.3s ease' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <h2 style={{ fontSize: '1.5rem' }}>Historial de Transacciones</h2>
+        <div>
+          <h2 style={{ fontSize: '1.5rem' }}>Historial de Transacciones</h2>
+          <p style={{ opacity: 0.5, fontSize: '0.8rem' }}>{filteredTransactions.length} registros encontrados</p>
+        </div>
         
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <input 
@@ -104,7 +107,7 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
         </div>
       </div>
       
-      <div style={{ overflowX: 'auto', maxHeight: '550px', overflowY: 'auto', borderRadius: '1rem' }}>
+      <div className="scroll-area" style={{ overflowX: 'auto', maxHeight: '550px', overflowY: 'auto', borderRadius: '1rem', border: '1px solid transparent', transition: 'all 0.3s ease' }}>
         <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.5rem' }}>
           <thead style={{ position: 'sticky', top: 0, zIndex: 10, background: 'var(--header-bg)', backdropFilter: 'blur(16px)' }}>
             <tr style={{ textAlign: 'left', opacity: 0.8, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer' }}>
@@ -154,13 +157,16 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
                   <td style={{ borderTopRightRadius: '1rem', borderBottomRightRadius: '1rem' }}>
                     <span style={{ 
                       fontSize: '0.65rem', 
-                      padding: '0.3rem 0.75rem', 
+                      padding: '0.35rem 0.85rem', 
                       borderRadius: '2rem',
                       background: 'transparent',
                       color: statusColor,
-                      border: `1.5px solid ${statusColor}80`,
-                      fontWeight: 700,
-                      textTransform: 'uppercase'
+                      border: `2px solid ${statusColor}`, // More visible border
+                      fontWeight: 800,
+                      textTransform: 'uppercase',
+                      display: 'inline-block',
+                      minWidth: '80px',
+                      textAlign: 'center'
                     }}>
                       {tx.status}
                     </span>
@@ -173,6 +179,16 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
       </div>
 
       <style>{`
+        .transaction-list-container:hover {
+          box-shadow: 0 10px 40px -10px rgba(0,0,0,0.3);
+        }
+        [data-theme='light'] .transaction-list-container:hover {
+          box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+        }
+        .scroll-area:hover {
+          border-color: var(--glass-border) !important;
+          background: rgba(var(--foreground), 0.01);
+        }
         .tx-row:hover {
           background: rgba(var(--foreground), 0.05) !important;
         }
@@ -183,6 +199,20 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
         th:hover {
           color: hsl(var(--primary)) !important;
           opacity: 1 !important;
+        }
+        /* Custom scrollbar for better visibility */
+        .scroll-area::-webkit-scrollbar {
+          width: 6px;
+        }
+        .scroll-area::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .scroll-area::-webkit-scrollbar-thumb {
+          background: var(--border);
+          border-radius: 10px;
+        }
+        .scroll-area::-webkit-scrollbar-thumb:hover {
+          background: var(--muted);
         }
       `}</style>
     </div>
