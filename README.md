@@ -9,12 +9,14 @@ Un dashboard moderno y premium para visualizar tus activos y transacciones de **
 
 ## ✨ Características Principales
 
-- 💳 **Balance en Vivo**: Visualización en tiempo real de cuentas de Checking e Inversiones.
-- 🕒 **Middleware de Cache**: Servidor Express que refresca datos cada 15 min de la API oficial y sirve al frontend cada 5 min.
-- 🌍 **Historial Completo**: Soporta el procesamiento de cientos de transacciones con filtros y ordenamiento avanzado.
-- 🏖️ **Tracker de Viajes**: Sección dedicada para seguir gastos específicos (ej. Viaje a Brasil Oct-Nov 2025).
-- 🎨 **Diseño Moderno**: Interfaz con Glassmorphism, animaciones suaves y modo oscuro nativo.
-- 🐳 **Docker-Ready**: Configuración completa con Docker Compose para despliegue productivo.
+- 💳 **Balance en Vivo**: Visualización en tiempo real de cuentas de Checking e Inversiones (Stocks).
+- 🕒 **Sincronización Inteligente**: Middleware de Cache (Express) que refresca datos cada 15 min de la API oficial. El frontend incluye un **Timer Visual** con barra de progreso que sincroniza localmente cada 5 min.
+- 📉 **Analíticas Avanzadas**: Gráficos interactivos de depósitos mensuales (ARS) y distribución de gastos por categoría usando Recharts.
+- 💵 **Tasa en Tiempo Real**: Integración con DolarAPI para obtener el tipo de cambio oficial automáticamente.
+- 🌍 **Historial Completo**: Procesamiento optimizado de cientos de transacciones con filtros y búsqueda.
+- 🛍️ **Gastos Recientes**: Sección dedicada para analizar el consumo de los últimos 7 días con totales en USD.
+- 🎨 **Diseño Premium**: Interfaz moderna con Glassmorphism, animaciones fluidas, selector de temas (Light/Dark/System) y favicon personalizado.
+- 🐳 **Docker-Ready**: Infraestructura completa con Docker Compose y builds optimizados en GHCR.
 
 ## 🏗️ Arquitectura
 
