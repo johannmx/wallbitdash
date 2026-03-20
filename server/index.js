@@ -163,6 +163,7 @@ const fetchWallbitData = async () => {
     }, 0).toFixed(2);
 
     // 6. Update Cache
+    cache.arsRate = arsRate;
     cache.transactions = mappedTxs;
     cache.recentExpenses = {
       title: "Gastos últimos 7 días",

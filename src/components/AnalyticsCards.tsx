@@ -4,7 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   PieChart, Pie, Cell, Legend 
 } from 'recharts';
-import { TrendingUp, PieChart as PieIcon } from 'lucide-react';
+import { TrendingUp, PieChart as PieIcon, DollarSign } from 'lucide-react';
 
 interface Transaction {
   uuid: string;
@@ -17,30 +17,44 @@ interface Transaction {
 
 interface AnalyticsCardsProps {
   transactions: Transaction[];
+  arsRate: number;
 }
 
 const COLORS = ['#6366f1', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6'];
 
-const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions }) => {
+const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
   
-  // 1. Process Data for Deposit Chart (Bar Chart)
-  const depositData = useMemo(() => {
-    const dailyDeposits: Record<string, number> = {};
+  // 1. Process Data for Monthly ARS Deposit Chart
+  const monthlyDepositData = useMemo(() => {
+    const monthlyARS: Record<string, number> = {};
+    const monthsNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
     
     transactions
       .filter(tx => tx.type.toLowerCase().includes('deposit_local') && tx.status === 'COMPLETED')
       .forEach(tx => {
-        dailyDeposits[tx.date] = (dailyDeposits[tx.date] || 0) + parseFloat(tx.amount);
+        const d = new Date(tx.date + 'T00:00:00Z');
+        const monthKey = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`;
+        monthlyARS[monthKey] = (monthlyARS[monthKey] || 0) + parseFloat(tx.amount);
       });
 
-    return Object.entries(dailyDeposits)
-      .map(([date, amount]) => ({ 
-        date: date.split('-').slice(1).join('/'), // MM/DD
-        amount: parseFloat(amount.toFixed(2)) 
-      }))
-      .sort((a,b) => a.date.localeCompare(b.date))
-      .slice(-7); 
+    return Object.entries(monthlyARS)
+      .map(([key, amount]) => {
+        const [year, monthIdx] = key.split('-');
+        return { 
+          name: `${monthsNames[parseInt(monthIdx)]} ${year.slice(2)}`,
+          amount: parseFloat(amount.toFixed(2)),
+          fullKey: key
+        };
+      })
+      .sort((a,b) => a.fullKey.localeCompare(b.fullKey))
+      .slice(-6); 
   }, [transactions]);
+
+  // Calculate total in USD for the chart period (approx)
+  const totalInUSD = useMemo(() => {
+    const sumARS = monthlyDepositData.reduce((acc, curr) => acc + curr.amount, 0);
+    return (sumARS / (arsRate || 1000)).toFixed(2);
+  }, [monthlyDepositData, arsRate]);
 
   // 2. Process Data for Expense Pie Chart
   const expenseBreakdown = useMemo(() => {
@@ -67,31 +81,50 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions }) => {
   return (
     <div className="analytics-container animate-in stagger-3" style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '1.5rem' }}>
       
-      {/* Deposit Bar Chart */}
-      <div className="glass" style={{ gridColumn: 'span 7', padding: '1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-          <div className="icon-container" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
-            <TrendingUp size={20} />
+      {/* Deposit Bar Chart (Monthly ARS) */}
+      <div className="glass" style={{ gridColumn: 'span 7', padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div className="icon-container" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
+              <TrendingUp size={20} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Depósitos Locales (ARS)</h3>
+              <p style={{ opacity: 0.5, fontSize: '0.8rem' }}>Volumen mensual en pesos</p>
+            </div>
           </div>
-          <div>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Depósitos Locales</h3>
-            <p style={{ opacity: 0.5, fontSize: '0.8rem' }}>Volumen de ingresos por día</p>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase' }}>Total Periodo</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#10b981' }}>${totalInUSD} <span style={{ fontSize: '0.7rem' }}>USD</span></div>
           </div>
         </div>
         
         <div style={{ width: '100%', height: '220px' }}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={depositData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-              <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis stroke="rgba(255,255,255,0.3)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
+            <BarChart data={monthlyDepositData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} vertical={false} />
+              <XAxis dataKey="name" stroke="currentColor" opacity={0.5} fontSize={11} tickLine={false} axisLine={false} />
+              <YAxis stroke="currentColor" opacity={0.5} fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val/1000}k`} />
               <Tooltip 
-                contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
-                itemStyle={{ color: '#10b981' }}
+                cursor={{ fill: 'rgba(var(--primary), 0.05)' }}
+                contentStyle={{ 
+                  backgroundColor: 'var(--glass-bg)', 
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid var(--glass-border)',
+                  borderRadius: '12px',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                }}
+                itemStyle={{ color: '#10b981', fontWeight: 600 }}
+                formatter={(value: any) => [`$${value} ARS`, 'Monto']}
               />
-              <Bar dataKey="amount" fill="#10b981" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="amount" fill="#10b981" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+        </div>
+
+        <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', opacity: 0.6 }}>
+          <DollarSign size={14} />
+          <span>Conversión basada en tasa actual: 1 USD = {arsRate} ARS</span>
         </div>
       </div>
 
@@ -102,7 +135,7 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions }) => {
             <PieIcon size={20} />
           </div>
           <div>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Desglose de Gastos</h3>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Distribución de Gastos</h3>
             <p style={{ opacity: 0.5, fontSize: '0.8rem' }}>Por categoría (Total)</p>
           </div>
         </div>
@@ -120,25 +153,31 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions }) => {
                 dataKey="value"
               >
                 {expenseBreakdown.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="var(--background)" strokeWidth={2} />
                 ))}
               </Pie>
-              <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }} />
-              <Legend verticalAlign="bottom" align="center" iconType="circle" wrapperStyle={{ fontSize: '10px' }} />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'var(--glass-bg)', 
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid var(--glass-border)',
+                  borderRadius: '12px',
+                  color: 'inherit'
+                }}
+                itemStyle={{ color: 'currentColor', fontWeight: 700 }} // Ensure color is visible
+              />
+              <Legend 
+                verticalAlign="bottom" 
+                align="center" 
+                iconType="circle" 
+                wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} 
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       <style>{`
-        .icon-container {
-          width: 36px;
-          height: 36px;
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
         @media (max-width: 992px) {
           .analytics-container { grid-template-columns: 1fr !important; }
           .glass { grid-column: span 12 !important; }
