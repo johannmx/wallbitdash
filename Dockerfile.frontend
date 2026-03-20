@@ -1,5 +1,5 @@
 # Frontend Build Stage
-FROM node:20-alpine AS build-stage
+FROM --platform=$BUILDPLATFORM node:20-alpine AS build-stage
 WORKDIR /app
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
