@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sun, Moon, Monitor, Wallet } from 'lucide-react';
+import { Sun, Moon, Monitor, Wallet, Eye, EyeOff } from 'lucide-react';
 import BalanceCards from './components/BalanceCards';
 import TransactionList from './components/TransactionList';
 import RecentExpenses from './components/RecentExpenses';
@@ -46,6 +46,7 @@ const initialState: DashboardData = {
 function App() {
   const [data, setData] = useState<DashboardData>(initialState);
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('theme') as Theme) || 'system');
+  const [showBalances, setShowBalances] = useState(true);
 
   // Theme effect
   useEffect(() => {
@@ -105,6 +106,23 @@ function App() {
         </div>
         
         <div className="header-actions" style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', flexWrap: 'nowrap' }}>
+          {/* Balance Visibility Toggle */}
+          <div className="glass" style={{ display: 'flex', padding: '0.3rem', borderRadius: '1rem' }}>
+            <button 
+              onClick={() => setShowBalances(!showBalances)}
+              className="theme-btn"
+              style={{ 
+                opacity: showBalances ? 0.5 : 1,
+                background: showBalances ? 'transparent' : 'hsl(var(--primary))',
+                color: showBalances ? 'inherit' : 'white',
+                boxShadow: showBalances ? 'none' : '0 4px 15px -3px hsla(var(--primary), 0.5)'
+              }}
+              title={showBalances ? "Ocultar saldos" : "Mostrar saldos"}
+            >
+              {showBalances ? <Eye size={18} /> : <EyeOff size={18} />}
+            </button>
+          </div>
+
           {/* Theme Toggle */}
           <div className="glass" style={{ display: 'flex', padding: '0.3rem', borderRadius: '1rem', gap: '0.3rem' }}>
             <button 
@@ -144,7 +162,7 @@ function App() {
       </header>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-        <BalanceCards checking={data.checking} stocks={data.stocks} />
+        <BalanceCards checking={data.checking} stocks={data.stocks} showBalances={showBalances} />
         <RecentExpenses data={data.recentExpenses} />
         <AnalyticsCards transactions={data.transactions} arsRate={data.arsRate || 1000} />
         <TransactionList transactions={data.transactions} />
