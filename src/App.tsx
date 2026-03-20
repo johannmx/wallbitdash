@@ -8,6 +8,12 @@ import RefreshTimer from './components/RefreshTimer';
 import { wallbitData } from './data/mockData';
 
 const API_URL = '/api/dashboard';
+const DASHBOARD_TOKEN = import.meta.env.VITE_DASHBOARD_TOKEN || '';
+
+const getHeaders = () => ({
+  'Content-Type': 'application/json',
+  ...(DASHBOARD_TOKEN ? { 'X-Dashboard-Token': DASHBOARD_TOKEN } : {})
+});
 
 interface DashboardData {
   checking: { balance: string; currency: string };
@@ -63,7 +69,7 @@ function App() {
   useEffect(() => {
     const fetchInitial = async () => {
       try {
-        const res = await fetch(API_URL);
+        const res = await fetch(API_URL, { headers: getHeaders() });
         if (res.ok) {
           const freshData = await res.json();
           setData(freshData);
@@ -77,7 +83,7 @@ function App() {
 
   const handleRefresh = async () => {
     try {
-      const result = await fetch(API_URL);
+      const result = await fetch(API_URL, { headers: getHeaders() });
       if (!result.ok) throw new Error('Refresh failed');
       const freshData = await result.json();
       setData({ ...freshData });

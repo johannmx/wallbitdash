@@ -4,6 +4,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 COPY . .
+# Run build as node user for safety during compilation
+USER node
 RUN npm run build
 
 # Frontend Production Stage (Nginx)

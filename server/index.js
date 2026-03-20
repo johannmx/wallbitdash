@@ -4,6 +4,7 @@ import cron from 'node-cron';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import helmet from 'helmet';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,9 +28,33 @@ const PORT = 3001;
 const DATA_PATH = process.env.DATA_PATH || path.join(__dirname, '../data/data.json');
 const API_KEY = process.env.WALLBIT_API_KEY;
 const API_BASE = 'https://api.wallbit.io/api/public/v1';
+const DASHBOARD_TOKEN = process.env.DASHBOARD_TOKEN;
 
-app.use(cors());
+// Security Middlewares
+app.use(helmet());
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS blocked'), false);
+  }
+}));
+
 app.use(express.json());
+
+// Auth Middleware
+const authMiddleware = (req, res, next) => {
+  if (!DASHBOARD_TOKEN) {
+    console.warn('⚠️ No DASHBOARD_TOKEN set. Backend is publicly accessible.');
+    return next();
+  }
+  const token = req.headers['x-dashboard-token'];
+  if (token === DASHBOARD_TOKEN) return next();
+  return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+};
 
 // Ensure data directory exists
 const dataDir = path.dirname(DATA_PATH);
@@ -185,7 +210,7 @@ const fetchWallbitData = async () => {
 cron.schedule('*/15 * * * *', fetchWallbitData);
 fetchWallbitData();
 
-app.get('/api/dashboard', (req, res) => {
+app.get('/api/dashboard', authMiddleware, (req, res) => {
   res.json({
     ...cache,
     _cacheInfo: {

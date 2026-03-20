@@ -4,5 +4,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --omit=dev --legacy-peer-deps
 COPY . .
+# Create data directory and set permissions for node user
+RUN mkdir -p data && chown -R node:node /app
+USER node
 EXPOSE 3001
 CMD ["node", "server/index.js"]
