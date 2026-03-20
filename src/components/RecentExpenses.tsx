@@ -23,18 +23,19 @@ const RecentExpenses: FC<RecentExpensesProps> = ({ data }) => {
     <div className="glass animate-in stagger-2" style={{ 
       marginTop: '2rem', 
       padding: '2rem', 
-      background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(59, 130, 246, 0.1) 100%)' 
+      background: 'linear-gradient(135deg, var(--glass-bg) 0%, rgba(59, 130, 246, 0.1) 100%)' 
     }}>
       <div style={{ marginBottom: '1.5rem' }}>
         <h2 style={{ fontSize: '1.8rem', marginBottom: '0.2rem' }} className="gradient-text">{data.title}</h2>
         <p style={{ opacity: 0.6, fontSize: '0.9rem' }}>{data.subtitle}</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 2fr', gap: '2rem' }}>
+      <div className="dashboard-grid">
         {/* Summary Card */}
         <div className="glass" style={{ 
+          gridColumn: 'span 4',
           padding: '1.5rem', 
-          background: 'rgba(0,0,0,0.2)', 
+          background: 'var(--summary-bg)', 
           display: 'flex', 
           flexDirection: 'column', 
           justifyContent: 'center', 
@@ -47,7 +48,7 @@ const RecentExpenses: FC<RecentExpensesProps> = ({ data }) => {
         </div>
 
         {/* Mini List */}
-        <div style={{ maxHeight: '250px', overflowY: 'auto', paddingRight: '1rem' }}>
+        <div style={{ gridColumn: 'span 8', maxHeight: '250px', overflowY: 'auto', paddingRight: '1rem' }}>
           {data.transactions.length === 0 ? (
             <div style={{ opacity: 0.3, textAlign: 'center', padding: '2rem' }}>No hay gastos en los últimos 7 días.</div>
           ) : (
@@ -56,7 +57,7 @@ const RecentExpenses: FC<RecentExpensesProps> = ({ data }) => {
                 display: 'flex', 
                 justifyContent: 'space-between', 
                 padding: '0.75rem 0', 
-                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                borderBottom: '1px solid var(--border)',
                 fontSize: '0.9rem',
                 opacity: tx.status === 'PENDING' ? 0.7 : 1
               }}>
@@ -79,6 +80,12 @@ const RecentExpenses: FC<RecentExpensesProps> = ({ data }) => {
           )}
         </div>
       </div>
+      <style>{`
+        @media (max-width: 768px) {
+            .dashboard-grid { grid-template-columns: 1fr !important; }
+            .glass { grid-column: span 1 !important; }
+        }
+      `}</style>
     </div>
   );
 };

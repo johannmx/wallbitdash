@@ -72,11 +72,11 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
     const s = status.toUpperCase();
     switch (s) {
       case 'COMPLETED': return 'hsl(var(--success))';
-      case 'PENDING': return 'hsl(var(--warning))'; // Amber
-      case 'REVERSED': return '#818cf8'; // Indigo/Purple
+      case 'PENDING': return 'hsl(var(--warning))'; 
+      case 'REVERSED': return '#818cf8'; 
       case 'FAILED':
       case 'DECLINED':
-      case 'EXPIRED': return 'rgba(255, 255, 255, 0.4)'; // Gray
+      case 'EXPIRED': return '#ef4444'; // Use a stronger red/gray for visibility
       default: return 'hsl(var(--foreground))';
     }
   };
@@ -89,39 +89,44 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <input 
             type="text" 
-            placeholder="Buscar por descripción, tipo..."
+            placeholder="Buscar transacciones..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ 
-              background: 'rgba(0,0,0,0.2)', 
-              border: '1px solid var(--glass-border)',
-              padding: '0.5rem 1rem',
+              background: 'var(--input-bg)', 
+              border: '1px solid var(--input-border)',
+              padding: '0.65rem 1rem',
               borderRadius: '0.75rem',
-              color: 'white',
-              width: '300px'
+              color: 'var(--foreground)',
+              width: '260px',
+              fontSize: '0.9rem'
             }}
           />
           <button 
             onClick={() => setShowAll(!showAll)}
             style={{ 
-              background: 'rgba(255,255,255,0.05)', 
-              border: '1px solid var(--glass-border)',
-              padding: '0.5rem 1rem',
+              background: 'var(--btn-secondary-bg)', 
+              border: '1px solid var(--input-border)',
+              padding: '0.65rem 1.25rem',
               borderRadius: '0.75rem',
-              color: 'white',
-              cursor: 'pointer'
+              color: 'var(--btn-secondary-text)',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              fontSize: '0.9rem'
             }}
+            className="view-all-btn"
           >
             {showAll ? 'Ver menos' : 'Ver todo'}
           </button>
         </div>
       </div>
       
-      <div style={{ overflowX: 'auto' }}>
+      <div style={{ overflowX: 'auto', maxHeight: showAll ? '600px' : 'auto', overflowY: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.75rem' }}>
-          <thead>
-            <tr style={{ textAlign: 'left', opacity: 0.4, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer' }}>
-              <th style={{ padding: '0 1rem' }} onClick={() => handleSort('date')}>Fecha {sortField === 'date' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+          <thead style={{ position: 'sticky', top: 0, zIndex: 10, background: 'var(--header-bg)', backdropFilter: 'blur(12px)' }}>
+            <tr style={{ textAlign: 'left', opacity: 0.7, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer' }}>
+              <th style={{ padding: '1rem' }} onClick={() => handleSort('date')}>Fecha {sortField === 'date' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
               <th onClick={() => handleSort('description')}>Descripción {sortField === 'description' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
               <th onClick={() => handleSort('type')}>Tipo {sortField === 'type' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
               <th onClick={() => handleSort('amount')}>Monto {sortField === 'amount' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
@@ -138,17 +143,17 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
               const statusColor = getStatusColor(tx.status);
 
               let amountColor = expense ? 'hsl(var(--error))' : 'hsl(var(--success))';
-              if (isFailed) amountColor = '#888';
+              if (isFailed) amountColor = 'var(--muted)';
               if (isPending) amountColor = 'hsl(var(--warning))';
               if (isReversed) amountColor = '#818cf8';
 
               return (
                 <tr key={tx.uuid} className="tx-row" style={{ 
-                  background: 'rgba(255,255,255,0.02)',
+                  background: 'rgba(var(--foreground), 0.02)',
                   borderRadius: '1rem',
                   opacity: isFailed ? 0.6 : 1
                 }}>
-                  <td style={{ padding: '1rem', borderTopLeftRadius: '1rem', borderBottomLeftRadius: '1rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                  <td style={{ padding: '1rem', borderTopLeftRadius: '1rem', borderBottomLeftRadius: '1rem', fontSize: '0.85rem' }}>
                     {new Date(tx.date + 'T00:00:00Z').toLocaleDateString('es-ES', {
                       day: '2-digit',
                       month: '2-digit',
@@ -161,10 +166,7 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
                   <td style={{ textTransform: 'capitalize', fontSize: '0.85rem', opacity: 0.7 }}>
                     {tx.type.replace(/_/g, ' ').toLowerCase()}
                   </td>
-                  <td style={{ 
-                    fontWeight: 700, 
-                    color: amountColor
-                  }}>
+                  <td style={{ fontWeight: 700, color: amountColor }}>
                     {expense ? '-' : '+'}${tx.amount} <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>{tx.currency}</span>
                   </td>
                   <td style={{ borderTopRightRadius: '1rem', borderBottomRightRadius: '1rem' }}>
@@ -172,9 +174,9 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
                       fontSize: '0.7rem', 
                       padding: '0.25rem 0.6rem', 
                       borderRadius: '2rem',
-                      background: isFailed ? 'rgba(255,255,255,0.05)' : `${statusColor}20`,
+                      background: 'transparent',
                       color: statusColor,
-                      border: `1px solid ${isFailed ? 'rgba(255,255,255,0.1)' : statusColor + '40'}`,
+                      border: `1.5px solid ${statusColor}a0`,
                       fontWeight: 700,
                       textTransform: 'uppercase'
                     }}>
@@ -190,15 +192,20 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
 
       <style>{`
         .tx-row:hover {
-          background: rgba(255,255,255,0.05) !important;
+          background: rgba(var(--foreground), 0.05) !important;
         }
         th {
-            white-space: nowrap;
-            padding: 0 0.5rem;
+          white-space: nowrap;
+          padding: 0.5rem;
         }
         th:hover {
           opacity: 1 !important;
-          color: hsl(var(--accent));
+          color: hsl(var(--primary));
+        }
+        .view-all-btn:hover {
+          background: var(--primary) !important;
+          color: white !important;
+          border-color: var(--primary) !important;
         }
       `}</style>
     </div>
