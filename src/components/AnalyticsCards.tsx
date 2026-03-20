@@ -1,8 +1,8 @@
 import type { FC } from 'react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  PieChart, Pie, Cell, Legend 
+  PieChart, Pie, Cell, Legend, Sector 
 } from 'recharts';
 import { TrendingUp, PieChart as PieIcon, DollarSign } from 'lucide-react';
 
@@ -22,8 +22,27 @@ interface AnalyticsCardsProps {
 
 const COLORS = ['#6366f1', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#0ea5e9'];
 
+// Active shape for Pie Chart zoom effect
+const renderActiveShape = (props: any) => {
+  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
+  return (
+    <g>
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius + 8}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+      />
+    </g>
+  );
+};
+
 const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
-  
+  const [activeIndex, setActiveIndex] = useState(-1);
+
   // 1. Process Data for Monthly ARS Deposit Chart
   const monthlyDepositData = useMemo(() => {
     const monthlyARS: Record<string, number> = {};
@@ -83,6 +102,14 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
       }));
   }, [transactions]);
 
+  const onPieEnter = (_: any, index: number) => {
+    setActiveIndex(index);
+  };
+
+  const onPieLeave = () => {
+    setActiveIndex(-1);
+  };
+
   return (
     <div className="analytics-container animate-in stagger-3" style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '1.5rem' }}>
       
@@ -100,7 +127,7 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase' }}>Total Ref. USD</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'hsl(var(--success))' }}>${totalInUSD} <span style={{ fontSize: '0.7rem' }}>USD</span></div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'hsl(var(--primary))' }}>${totalInUSD} <span style={{ fontSize: '0.7rem' }}>USD</span></div>
           </div>
         </div>
         
@@ -118,17 +145,31 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
                   border: '1px solid var(--glass-border)',
                   borderRadius: '12px',
                   boxShadow: 'var(--glass-shadow)',
-                  color: 'var(--foreground)'
+                  color: 'var(--foreground)',
+                  fontSize: '12px'
                 }}
                 itemStyle={{ color: 'hsl(var(--primary))', fontWeight: 600 }}
-                formatter={(value: number) => [`$${value.toLocaleString()} ARS`, 'Depósito']}
+                content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                        const val = payload[0].value as number;
+                        const usdVal = (val / (arsRate || 1)).toFixed(2);
+                        return (
+                            <div className="glass" style={{ padding: '0.75rem', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)' }}>
+                                <div style={{ fontWeight: 700, marginBottom: '0.25rem' }}>{payload[0].payload.name}</div>
+                                <div style={{ color: 'hsl(var(--primary))' }}>ARS: ${val.toLocaleString()}</div>
+                                <div style={{ opacity: 0.6, fontSize: '0.7rem' }}>USD Ref: ${usdVal}</div>
+                            </div>
+                        );
+                    }
+                    return null;
+                }}
               />
               <Bar dataKey="amount" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', opacity: 0.5 }}>
+        <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.7rem', opacity: 0.5 }}>
           <DollarSign size={14} />
           <span>Calculado con Dólar Oficial: 1 USD = {arsRate} ARS</span>
         </div>
@@ -142,7 +183,7 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
           </div>
           <div>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Distribución de Gastos</h3>
-            <p style={{ opacity: 0.5, fontSize: '0.8rem' }}>Ranking por consumo</p>
+            <p style={{ opacity: 0.5, fontSize: '0.8rem' }}>Ranking por consumo (Total)</p>
           </div>
         </div>
 
@@ -150,6 +191,8 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
+                activeIndex={activeIndex}
+                activeShape={renderActiveShape}
                 data={expenseBreakdown}
                 cx="50%"
                 cy="50%"
@@ -157,9 +200,11 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
                 outerRadius={75}
                 paddingAngle={5}
                 dataKey="value"
+                onMouseEnter={onPieEnter}
+                onMouseLeave={onPieLeave}
               >
                 {expenseBreakdown.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="var(--card)" strokeWidth={2} />
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="var(--background)" strokeWidth={2} />
                 ))}
               </Pie>
               <Tooltip 
@@ -171,7 +216,7 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
                   color: 'var(--foreground)'
                 }}
                 itemStyle={{ fontWeight: 700 }}
-                formatter={(value: number) => [`$${value.toFixed(2)} USD`, 'Gasto']}
+                formatter={(value: number) => [`$${value.toFixed(2)} USD`, 'Total']}
               />
               <Legend 
                 verticalAlign="bottom" 
