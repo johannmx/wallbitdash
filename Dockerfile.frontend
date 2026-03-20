@@ -4,8 +4,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 COPY . .
-# Run build as node user (this is safer, but if it still fails we may need root for build too)
-USER node
+# Run build as root to ensure full access to node_modules/types
 RUN npm run build
 
 # Frontend Production Stage (Nginx)
