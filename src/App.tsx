@@ -89,52 +89,54 @@ function App() {
   };
 
   return (
-    <main className="animate-in">
-      <header style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
-        <div>
-          <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
+    <main className="animate-in" style={{ padding: 'max(1rem, 2vw)', maxWidth: '1400px', margin: '0 auto' }}>
+      <header className="header-content" style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
+        <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
+          <h1 style={{ fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', marginBottom: '0.25rem' }}>
             Hola, <span className="gradient-text">Johann</span>
           </h1>
-          <p style={{ opacity: 0.6 }}>Análisis de finanzas personales en tiempo real.</p>
+          <p style={{ opacity: 0.6, fontSize: '0.9rem' }}>Análisis de finanzas personales en tiempo real.</p>
         </div>
         
-        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+        <div className="header-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'nowrap' }}>
           {/* Theme Toggle */}
-          <div className="glass" style={{ display: 'flex', padding: '0.25rem', borderRadius: '1rem', gap: '0.25rem' }}>
+          <div className="glass" style={{ display: 'flex', padding: '0.2rem', borderRadius: '0.8rem', gap: '0.2rem' }}>
             <button 
               onClick={() => setTheme('light')}
               className={`theme-btn ${theme === 'light' ? 'active' : ''}`}
             >
-              <Sun size={18} />
+              <Sun size={16} />
             </button>
             <button 
               onClick={() => setTheme('system')}
               className={`theme-btn ${theme === 'system' ? 'active' : ''}`}
             >
-              <Monitor size={18} />
+              <Monitor size={16} />
             </button>
             <button 
               onClick={() => setTheme('dark')}
               className={`theme-btn ${theme === 'dark' ? 'active' : ''}`}
             >
-              <Moon size={18} />
+              <Moon size={16} />
             </button>
           </div>
 
           <RefreshTimer onRefresh={handleRefresh} />
           
-          <div className="glass" style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, background: 'hsl(var(--primary))', color: 'white' }}>
+          <div className="glass brand-logo" style={{ width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, background: 'hsl(var(--primary))', color: 'white', borderRadius: '12px', flexShrink: 0 }}>
             JM
           </div>
         </div>
       </header>
 
-      <BalanceCards checking={data.checking} stocks={data.stocks} />
-      <RecentExpenses data={data.recentExpenses} />
-      <AnalyticsCards transactions={data.transactions} arsRate={data.arsRate || 1000} />
-      <TransactionList transactions={data.transactions} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <BalanceCards checking={data.checking} stocks={data.stocks} />
+        <RecentExpenses data={data.recentExpenses} />
+        <AnalyticsCards transactions={data.transactions} arsRate={data.arsRate || 1000} />
+        <TransactionList transactions={data.transactions} />
+      </div>
 
-      <footer style={{ marginTop: '4rem', opacity: 0.3, textAlign: 'center', fontSize: '0.8rem' }}>
+      <footer style={{ marginTop: '4rem', opacity: 0.3, textAlign: 'center', fontSize: '0.8rem', paddingBottom: '2rem' }}>
         <p>Wallbit Cache Middleware • Theme Support ✨</p>
         {data._cacheInfo && (
           <p style={{ fontSize: '0.7rem' }}>Cache actualizada: {new Date(data._cacheInfo.lastUpdated).toLocaleTimeString()}</p>
@@ -143,12 +145,12 @@ function App() {
 
       <style>{`
         .theme-btn {
-          width: 32px;
-          height: 32px;
+          width: 30px;
+          height: 30px;
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: 0.75rem;
+          border-radius: 0.6rem;
           border: none;
           background: transparent;
           cursor: pointer;
@@ -165,6 +167,11 @@ function App() {
           background: hsl(var(--primary));
           color: white;
           box-shadow: 0 4px 12px hsla(var(--primary), 0.3);
+        }
+        .gradient-text {
+          background: linear-gradient(135deg, hsl(var(--primary)), #818cf8);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
         }
       `}</style>
     </main>

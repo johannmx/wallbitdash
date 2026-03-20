@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 type Transaction = {
   uuid: string;
@@ -19,6 +19,14 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState<keyof Transaction>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const isExpense = (type: string) => {
     const t = type.toLowerCase();
@@ -55,7 +63,7 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
         : bVal.localeCompare(aVal);
     });
 
-    return txs; // Return all records for scrollable view
+    return txs; 
   }, [search, sortField, sortOrder, transactions]);
 
   const handleSort = (field: keyof Transaction) => {
@@ -81,17 +89,17 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
   };
 
   return (
-    <div className="glass transaction-list-container animate-in stagger-4" style={{ marginTop: '2rem', padding: '2rem', transition: 'all 0.4s ease' }}>
+    <div className="glass transaction-list-container animate-in stagger-4" style={{ marginTop: '2rem', padding: isMobile ? '1.25rem' : '2rem', transition: 'all 0.4s ease' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ fontSize: '1.5rem' }}>Historial de Transacciones</h2>
-          <p style={{ opacity: 0.5, fontSize: '0.8rem' }}>{filteredTransactions.length} registros encontrados</p>
+          <h2 style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>Historial</h2>
+          <p style={{ opacity: 0.5, fontSize: '0.75rem' }}>{filteredTransactions.length} registros</p>
         </div>
         
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: isMobile ? '100%' : 'auto' }}>
           <input 
             type="text" 
-            placeholder="Filtrar por descripción o tipo..."
+            placeholder="Buscar..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ 
@@ -100,32 +108,30 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
               padding: '0.65rem 1.25rem',
               borderRadius: '0.75rem',
               color: 'var(--foreground)',
-              width: '280px',
+              width: '100%',
+              maxWidth: isMobile ? '100%' : '280px',
               fontSize: '0.9rem'
             }}
           />
         </div>
       </div>
       
-      <div className="scroll-area" style={{ overflowX: 'auto', maxHeight: '550px', overflowY: 'auto', borderRadius: '1rem', border: '1px solid transparent', transition: 'all 0.3s ease' }}>
-        <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.4rem' }}>
-          <thead style={{ position: 'sticky', top: 0, zIndex: 10, background: 'var(--header-bg)', backdropFilter: 'blur(20px)' }}>
-            <tr style={{ textAlign: 'left', opacity: 0.8, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer' }}>
-              <th style={{ padding: '1.25rem 1rem' }} onClick={() => handleSort('date')}>Fecha {sortField === 'date' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
-              <th onClick={() => handleSort('description')}>Descripción {sortField === 'description' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
-              <th onClick={() => handleSort('type')}>Tipo {sortField === 'type' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
-              <th onClick={() => handleSort('amount')}>Monto {sortField === 'amount' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
-              <th onClick={() => handleSort('status')}>Estado {sortField === 'status' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
-            </tr>
-          </thead>
-          <tbody>
+      <div className="scroll-area" style={{ 
+        overflowX: isMobile ? 'hidden' : 'auto', 
+        maxHeight: '550px', 
+        overflowY: 'auto', 
+        borderRadius: '1rem'
+      }}>
+        {isMobile ? (
+          /* Mobile Card View (Requested only for History) */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {filteredTransactions.map((tx) => {
               const expense = isExpense(tx.type);
+              const statusColor = getStatusColor(tx.status);
               const statusUpper = tx.status.toUpperCase();
               const isFailed = ['FAILED', 'DECLINED', 'EXPIRED'].includes(statusUpper);
               const isPending = statusUpper === 'PENDING';
               const isReversed = statusUpper === 'REVERSED';
-              const statusColor = getStatusColor(tx.status);
 
               let amountColor = expense ? 'hsl(var(--error))' : 'hsl(var(--success))';
               if (isFailed) amountColor = 'var(--muted)';
@@ -133,49 +139,104 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
               if (isReversed) amountColor = '#8a89ff';
 
               return (
-                <tr key={tx.uuid} className="tx-row" style={{ 
-                  background: 'hsla(var(--foreground), 0.01)', // Softened background
+                <div key={tx.uuid} style={{ 
+                  background: 'hsla(var(--foreground), 0.03)', 
+                  padding: '1rem', 
                   borderRadius: '1rem',
-                  opacity: isFailed ? 0.7 : 1
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  opacity: isFailed ? 0.7 : 1,
+                  border: '1px solid var(--border)'
                 }}>
-                  <td style={{ padding: '0.85rem 1rem', borderTopLeftRadius: '1rem', borderBottomLeftRadius: '1rem', fontSize: '0.85rem', fontWeight: 500 }}>
-                    {new Date(tx.date + 'T00:00:00Z').toLocaleDateString('es-ES', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric'
-                    })}
-                  </td>
-                  <td style={{ fontSize: '0.85rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {tx.description || '-'}
-                  </td>
-                  <td style={{ textTransform: 'capitalize', fontSize: '0.8rem', opacity: 0.6 }}>
-                    {tx.type.replace(/_/g, ' ').toLowerCase()}
-                  </td>
-                  <td style={{ fontWeight: 700, color: amountColor, fontSize: '0.9rem' }}>
-                    {expense ? '-' : '+'}${tx.amount} <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>{tx.currency}</span>
-                  </td>
-                  <td style={{ borderTopRightRadius: '1rem', borderBottomRightRadius: '1rem' }}>
-                    <span style={{ 
-                      fontSize: '0.65rem', 
-                      padding: '0.3rem 0.75rem', 
-                      borderRadius: '2rem',
-                      background: 'transparent',
-                      color: statusColor,
-                      border: `2px solid ${statusColor}`,
-                      fontWeight: 800,
-                      textTransform: 'uppercase',
-                      display: 'inline-block',
-                      minWidth: '75px',
-                      textAlign: 'center'
-                    }}>
-                      {tx.status}
-                    </span>
-                  </td>
-                </tr>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', maxWidth: '60%' }}>
+                    <div style={{ fontSize: '0.7rem', opacity: 0.5 }}>
+                        {new Date(tx.date + 'T00:00:00Z').toLocaleDateString('es-ES')}
+                    </div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {tx.description || tx.type.replace(/_/g, ' ')}
+                    </div>
+                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: statusColor, textTransform: 'uppercase' }}>
+                        {tx.status}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontWeight: 800, color: amountColor, fontSize: '1rem' }}>
+                      {expense ? '-' : '+'}${tx.amount}
+                    </div>
+                    <div style={{ fontSize: '0.7rem', opacity: 0.5 }}>{tx.currency}</div>
+                  </div>
+                </div>
               );
             })}
-          </tbody>
-        </table>
+          </div>
+        ) : (
+          /* Desktop Table View */
+          <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.4rem' }}>
+            <thead style={{ position: 'sticky', top: 0, zIndex: 10, background: 'var(--header-bg)', backdropFilter: 'blur(20px)' }}>
+              <tr style={{ textAlign: 'left', opacity: 0.8, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer' }}>
+                <th style={{ padding: '1.25rem 1rem' }} onClick={() => handleSort('date')}>Fecha {sortField === 'date' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+                <th onClick={() => handleSort('description')}>Descripción {sortField === 'description' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+                <th onClick={() => handleSort('type')}>Tipo {sortField === 'type' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+                <th onClick={() => handleSort('amount')}>Monto {sortField === 'amount' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+                <th onClick={() => handleSort('status')}>Estado {sortField === 'status' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTransactions.map((tx) => {
+                const expense = isExpense(tx.type);
+                const statusColor = getStatusColor(tx.status);
+                const statusUpper = tx.status.toUpperCase();
+                const isFailed = ['FAILED', 'DECLINED', 'EXPIRED'].includes(statusUpper);
+                const isPending = statusUpper === 'PENDING';
+                const isReversed = statusUpper === 'REVERSED';
+
+                let amountColor = expense ? 'hsl(var(--error))' : 'hsl(var(--success))';
+                if (isFailed) amountColor = 'var(--muted)';
+                if (isPending) amountColor = 'hsl(var(--warning))';
+                if (isReversed) amountColor = '#8a89ff';
+
+                return (
+                  <tr key={tx.uuid} className="tx-row" style={{ 
+                    background: 'hsla(var(--foreground), 0.01)', 
+                    borderRadius: '1rem',
+                    opacity: isFailed ? 0.7 : 1
+                  }}>
+                    <td style={{ padding: '0.85rem 1rem', borderTopLeftRadius: '1rem', borderBottomLeftRadius: '1rem', fontSize: '0.85rem', fontWeight: 500 }}>
+                      {new Date(tx.date + 'T00:00:00Z').toLocaleDateString('es-ES')}
+                    </td>
+                    <td style={{ fontSize: '0.85rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {tx.description || '-'}
+                    </td>
+                    <td style={{ textTransform: 'capitalize', fontSize: '0.8rem', opacity: 0.6 }}>
+                      {tx.type.replace(/_/g, ' ').toLowerCase()}
+                    </td>
+                    <td style={{ fontWeight: 700, color: amountColor, fontSize: '0.9rem' }}>
+                      {expense ? '-' : '+'}${tx.amount} <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>{tx.currency}</span>
+                    </td>
+                    <td style={{ borderTopRightRadius: '1rem', borderBottomRightRadius: '1rem' }}>
+                      <span style={{ 
+                        fontSize: '0.65rem', 
+                        padding: '0.3rem 0.75rem', 
+                        borderRadius: '2rem',
+                        background: 'transparent',
+                        color: statusColor,
+                        border: `2px solid ${statusColor}`,
+                        fontWeight: 800,
+                        textTransform: 'uppercase',
+                        display: 'inline-block',
+                        minWidth: '75px',
+                        textAlign: 'center'
+                      }}>
+                        {tx.status}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <style>{`
@@ -184,9 +245,6 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
         }
         [data-theme='light'] .transaction-list-container:hover {
           box-shadow: 0 12px 48px -12px rgba(0,0,0,0.1);
-        }
-        .scroll-area:hover {
-          border-color: var(--glass-border) !important;
         }
         .tx-row:hover {
           background: hsla(var(--foreground), 0.04) !important;
@@ -199,25 +257,17 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
           color: hsl(var(--primary)) !important;
           opacity: 1 !important;
         }
-        /* Custom scrollbar optimized for visibility */
+        /* Keep lateral scrollable behavior */
         .scroll-area::-webkit-scrollbar {
           width: 8px;
-        }
-        .scroll-area::-webkit-scrollbar-track {
-          background: transparent;
+          height: 8px;
         }
         .scroll-area::-webkit-scrollbar-thumb {
-          background: hsla(var(--foreground), 0.1);
+          background: hsla(var(--foreground), 0.15);
           border-radius: 10px;
-          border: 2px solid transparent;
-          background-clip: padding-box;
-          transition: background 0.3s ease;
         }
         .scroll-area:hover::-webkit-scrollbar-thumb {
-          background-color: hsla(var(--muted), 0.4);
-        }
-        .scroll-area::-webkit-scrollbar-thumb:hover {
-          background-color: hsl(var(--primary)) !important;
+          background-color: hsla(var(--foreground), 0.3);
         }
       `}</style>
     </div>
