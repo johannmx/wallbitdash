@@ -102,6 +102,10 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
       }));
   }, [transactions]);
 
+  const totalExpenseUSD = useMemo(() => {
+    return expenseBreakdown.reduce((acc, curr) => acc + curr.value, 0).toFixed(2);
+  }, [expenseBreakdown]);
+
   const onPieEnter = (_: any, index: number) => {
     setActiveIndex(index);
   };
@@ -139,22 +143,12 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
               <YAxis stroke="currentColor" opacity={0.5} fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => `$${(val/1000).toFixed(0)}k`} />
               <Tooltip 
                 cursor={{ fill: 'currentColor', opacity: 0.05 }}
-                contentStyle={{ 
-                  backgroundColor: 'var(--glass-bg)', 
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid var(--glass-border)',
-                  borderRadius: '12px',
-                  boxShadow: 'var(--glass-shadow)',
-                  color: 'var(--foreground)',
-                  fontSize: '12px'
-                }}
-                itemStyle={{ color: 'hsl(var(--primary))', fontWeight: 600 }}
                 content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                         const val = payload[0].value as number;
                         const usdVal = (val / (arsRate || 1)).toFixed(2);
                         return (
-                            <div className="glass" style={{ padding: '0.75rem', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)' }}>
+                            <div className="glass" style={{ padding: '0.75rem', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'hsl(var(--foreground))' }}>
                                 <div style={{ fontWeight: 700, marginBottom: '0.25rem' }}>{payload[0].payload.name}</div>
                                 <div style={{ color: 'hsl(var(--primary))' }}>ARS: ${val.toLocaleString()}</div>
                                 <div style={{ opacity: 0.6, fontSize: '0.7rem' }}>USD Ref: ${usdVal}</div>
@@ -177,13 +171,19 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
 
       {/* Expense Pie Chart */}
       <div className="glass" style={{ gridColumn: 'span 5', padding: '1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-          <div className="icon-container" style={{ background: 'hsla(var(--error), 0.1)', color: 'hsl(var(--error))' }}>
-            <PieIcon size={20} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div className="icon-container" style={{ background: 'hsla(var(--error), 0.1)', color: 'hsl(var(--error))' }}>
+              <PieIcon size={20} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Distribución de Gastos</h3>
+              <p style={{ opacity: 0.5, fontSize: '0.8rem' }}>Ranking por consumo</p>
+            </div>
           </div>
-          <div>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Distribución de Gastos</h3>
-            <p style={{ opacity: 0.5, fontSize: '0.8rem' }}>Ranking por consumo (Total)</p>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase' }}>Total USD</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'hsl(var(--error))' }}>${totalExpenseUSD}</div>
           </div>
         </div>
 
@@ -208,15 +208,19 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
                 ))}
               </Pie>
               <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'var(--glass-bg)', 
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid var(--glass-border)',
-                  borderRadius: '12px',
-                  color: 'var(--foreground)'
+                content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                        return (
+                            <div className="glass" style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'hsl(var(--foreground))' }}>
+                                <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{payload[0].name}</div>
+                                <div style={{ color: payload[0].fill, fontSize: '0.9rem', fontWeight: 800 }}>
+                                    ${(payload[0].value as number).toFixed(2)} USD
+                                </div>
+                            </div>
+                        );
+                    }
+                    return null;
                 }}
-                itemStyle={{ fontWeight: 700 }}
-                formatter={(value: number) => [`$${value.toFixed(2)} USD`, 'Total']}
               />
               <Legend 
                 verticalAlign="bottom" 

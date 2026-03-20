@@ -81,7 +81,7 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
   };
 
   return (
-    <div className="glass transaction-list-container animate-in stagger-4" style={{ marginTop: '2rem', padding: '2rem', transition: 'all 0.3s ease' }}>
+    <div className="glass transaction-list-container animate-in stagger-4" style={{ marginTop: '2rem', padding: '2rem', transition: 'all 0.4s ease' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem' }}>Historial de Transacciones</h2>
@@ -108,8 +108,8 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
       </div>
       
       <div className="scroll-area" style={{ overflowX: 'auto', maxHeight: '550px', overflowY: 'auto', borderRadius: '1rem', border: '1px solid transparent', transition: 'all 0.3s ease' }}>
-        <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.5rem' }}>
-          <thead style={{ position: 'sticky', top: 0, zIndex: 10, background: 'var(--header-bg)', backdropFilter: 'blur(16px)' }}>
+        <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.4rem' }}>
+          <thead style={{ position: 'sticky', top: 0, zIndex: 10, background: 'var(--header-bg)', backdropFilter: 'blur(20px)' }}>
             <tr style={{ textAlign: 'left', opacity: 0.8, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer' }}>
               <th style={{ padding: '1.25rem 1rem' }} onClick={() => handleSort('date')}>Fecha {sortField === 'date' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
               <th onClick={() => handleSort('description')}>Descripción {sortField === 'description' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
@@ -134,38 +134,38 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
 
               return (
                 <tr key={tx.uuid} className="tx-row" style={{ 
-                  background: 'rgba(var(--foreground), 0.02)',
+                  background: 'hsla(var(--foreground), 0.01)', // Softened background
                   borderRadius: '1rem',
                   opacity: isFailed ? 0.7 : 1
                 }}>
-                  <td style={{ padding: '1rem', borderTopLeftRadius: '1rem', borderBottomLeftRadius: '1rem', fontSize: '0.85rem', fontWeight: 500 }}>
+                  <td style={{ padding: '0.85rem 1rem', borderTopLeftRadius: '1rem', borderBottomLeftRadius: '1rem', fontSize: '0.85rem', fontWeight: 500 }}>
                     {new Date(tx.date + 'T00:00:00Z').toLocaleDateString('es-ES', {
                       day: '2-digit',
                       month: '2-digit',
                       year: 'numeric'
                     })}
                   </td>
-                  <td style={{ fontSize: '0.9rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <td style={{ fontSize: '0.85rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {tx.description || '-'}
                   </td>
                   <td style={{ textTransform: 'capitalize', fontSize: '0.8rem', opacity: 0.6 }}>
                     {tx.type.replace(/_/g, ' ').toLowerCase()}
                   </td>
-                  <td style={{ fontWeight: 700, color: amountColor }}>
+                  <td style={{ fontWeight: 700, color: amountColor, fontSize: '0.9rem' }}>
                     {expense ? '-' : '+'}${tx.amount} <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>{tx.currency}</span>
                   </td>
                   <td style={{ borderTopRightRadius: '1rem', borderBottomRightRadius: '1rem' }}>
                     <span style={{ 
                       fontSize: '0.65rem', 
-                      padding: '0.35rem 0.85rem', 
+                      padding: '0.3rem 0.75rem', 
                       borderRadius: '2rem',
                       background: 'transparent',
                       color: statusColor,
-                      border: `2px solid ${statusColor}`, // More visible border
+                      border: `2px solid ${statusColor}`,
                       fontWeight: 800,
                       textTransform: 'uppercase',
                       display: 'inline-block',
-                      minWidth: '80px',
+                      minWidth: '75px',
                       textAlign: 'center'
                     }}>
                       {tx.status}
@@ -180,17 +180,16 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
 
       <style>{`
         .transaction-list-container:hover {
-          box-shadow: 0 10px 40px -10px rgba(0,0,0,0.3);
+          box-shadow: 0 12px 48px -12px rgba(0,0,0,0.4);
         }
         [data-theme='light'] .transaction-list-container:hover {
-          box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+          box-shadow: 0 12px 48px -12px rgba(0,0,0,0.1);
         }
         .scroll-area:hover {
           border-color: var(--glass-border) !important;
-          background: rgba(var(--foreground), 0.01);
         }
         .tx-row:hover {
-          background: rgba(var(--foreground), 0.05) !important;
+          background: hsla(var(--foreground), 0.04) !important;
         }
         th {
           white-space: nowrap;
@@ -200,19 +199,25 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
           color: hsl(var(--primary)) !important;
           opacity: 1 !important;
         }
-        /* Custom scrollbar for better visibility */
+        /* Custom scrollbar optimized for visibility */
         .scroll-area::-webkit-scrollbar {
-          width: 6px;
+          width: 8px;
         }
         .scroll-area::-webkit-scrollbar-track {
           background: transparent;
         }
         .scroll-area::-webkit-scrollbar-thumb {
-          background: var(--border);
+          background: hsla(var(--foreground), 0.1);
           border-radius: 10px;
+          border: 2px solid transparent;
+          background-clip: padding-box;
+          transition: background 0.3s ease;
+        }
+        .scroll-area:hover::-webkit-scrollbar-thumb {
+          background-color: hsla(var(--muted), 0.4);
         }
         .scroll-area::-webkit-scrollbar-thumb:hover {
-          background: var(--muted);
+          background-color: hsl(var(--primary)) !important;
         }
       `}</style>
     </div>
