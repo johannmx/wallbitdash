@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Sun, Moon, Monitor } from 'lucide-react';
 import BalanceCards from './components/BalanceCards';
 import TransactionList from './components/TransactionList';
@@ -164,7 +164,7 @@ function App() {
           opacity: 1;
           background: hsl(var(--primary));
           color: white;
-          box-shadow: 0 4px 12px rgba(var(--primary), 0.3);
+          box-shadow: 0 4px 12px hsla(var(--primary), 0.3);
         }
       `}</style>
     </main>

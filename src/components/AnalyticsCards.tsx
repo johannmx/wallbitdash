@@ -106,16 +106,17 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
               <XAxis dataKey="name" stroke="currentColor" opacity={0.5} fontSize={11} tickLine={false} axisLine={false} />
               <YAxis stroke="currentColor" opacity={0.5} fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val/1000}k`} />
               <Tooltip 
-                cursor={{ fill: 'rgba(var(--primary), 0.05)' }}
+                cursor={{ fill: 'currentColor', opacity: 0.05 }}
                 contentStyle={{ 
                   backgroundColor: 'var(--glass-bg)', 
                   backdropFilter: 'blur(8px)',
                   border: '1px solid var(--glass-border)',
                   borderRadius: '12px',
-                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                  color: 'var(--foreground)'
                 }}
                 itemStyle={{ color: '#10b981', fontWeight: 600 }}
-                formatter={(value: any) => [`$${value} ARS`, 'Monto']}
+                formatter={(value: number) => [`$${value} ARS`, 'Monto']}
               />
               <Bar dataKey="amount" fill="#10b981" radius={[6, 6, 0, 0]} />
             </BarChart>
