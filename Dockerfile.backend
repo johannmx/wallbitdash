@@ -1,11 +1,13 @@
 # Backend Production Stage
 FROM node:20-alpine
 WORKDIR /app
-COPY package*.json ./
-RUN npm install --omit=dev --legacy-peer-deps
-COPY . .
-# Create data directory and set permissions for node user
-RUN mkdir -p data && chown -R node:node /app
+# Set ownership for the node user
+RUN chown -R node:node /app
 USER node
+COPY --chown=node:node package*.json ./
+RUN npm install --omit=dev --legacy-peer-deps
+COPY --chown=node:node . .
+# Create data directory (node user now has permissions)
+RUN mkdir -p data
 EXPOSE 3001
 CMD ["node", "server/index.js"]

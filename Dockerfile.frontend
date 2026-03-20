@@ -1,11 +1,12 @@
 # Frontend Build Stage
 FROM --platform=$BUILDPLATFORM node:20-alpine AS build-stage
 WORKDIR /app
-COPY package*.json ./
-RUN npm install --legacy-peer-deps
-COPY . .
-# Run build as node user for safety during compilation
+# Set ownership for the node user
+RUN chown -R node:node /app
 USER node
+COPY --chown=node:node package*.json ./
+RUN npm install --legacy-peer-deps
+COPY --chown=node:node . .
 RUN npm run build
 
 # Frontend Production Stage (Nginx)
