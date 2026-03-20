@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { useState, useEffect } from 'react';
-import { getFriendlyMessage } from '../utils/errorMessages';
+import { RefreshCw, AlertCircle } from 'lucide-react';
 
 interface RefreshTimerProps {
   onRefresh: () => Promise<any>;
@@ -10,6 +10,9 @@ const RefreshTimer: FC<RefreshTimerProps> = ({ onRefresh }) => {
   const [timeLeft, setTimeLeft] = useState(300);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [errorStatus, setErrorStatus] = useState<{ code: string; status: number } | null>(null);
+
+  const TOTAL_TIME = 300;
+  const progress = ((TOTAL_TIME - timeLeft) / TOTAL_TIME) * 100;
 
   useEffect(() => {
     if (timeLeft <= 0) {
@@ -31,7 +34,6 @@ const RefreshTimer: FC<RefreshTimerProps> = ({ onRefresh }) => {
       if (onRefresh) await onRefresh();
       setTimeLeft(300);
     } catch (e: any) {
-      // Map error to user-friendly message
       setErrorStatus({ code: e.code || 'UNKNOWN', status: e.status || 500 });
     } finally {
       setIsRefreshing(false);
@@ -45,79 +47,82 @@ const RefreshTimer: FC<RefreshTimerProps> = ({ onRefresh }) => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        {errorStatus && (
-          <span style={{ 
-            color: 'white', 
-            background: 'hsl(var(--error))', 
-            fontSize: '0.7rem', 
-            fontWeight: 600, 
-            padding: '0.3rem 0.6rem', 
-            borderRadius: '0.5rem',
-            boxShadow: '0 4px 12px rgba(var(--error), 0.3)'
-          }}>
-            Status {errorStatus.status}: {getFriendlyMessage(errorStatus.code)}
-          </span>
-        )}
-        
-        <div className="glass" style={{ 
-          padding: '0.5rem 1rem', 
-          fontSize: '0.8rem', 
-          fontWeight: 600,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          minWidth: '100px',
-          justifyContent: 'center'
-        }}>
-          <div style={{ 
-            width: '8px', 
-            height: '8px', 
-            borderRadius: '50%', 
-            background: 'hsl(var(--accent))',
-            animation: 'pulse 2s infinite'
-          }} />
+    <div className="glass" style={{ 
+      display: 'flex', 
+      padding: '0.35rem', 
+      borderRadius: '1.25rem', 
+      alignItems: 'center', 
+      gap: '1rem',
+      minWidth: '280px'
+    }}>
+      {/* Visual Progress Bar Section (Integrated into the capsule) */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.2rem', paddingLeft: '0.75rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.6rem', fontWeight: 800, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <span>Sync</span>
           <span>{formatTime(timeLeft)}</span>
         </div>
+        <div style={{ 
+          height: '4px', 
+          width: '100%', 
+          borderRadius: '10px', 
+          overflow: 'hidden', 
+          background: 'hsla(var(--foreground), 0.05)',
+        }}>
+          <div style={{ 
+            height: '100%', 
+            width: `${progress}%`, 
+            background: 'linear-gradient(90deg, hsl(var(--primary)), #818cf8)',
+            borderRadius: '10px',
+            transition: 'width 1s linear',
+          }} />
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        {errorStatus && (
+          <div title={`Error ${errorStatus.status}`} style={{ color: '#ef4444', animation: 'pulse 2s infinite' }}>
+            <AlertCircle size={16} />
+          </div>
+        )}
         
         <button 
           onClick={handleLocalRefresh}
           disabled={isRefreshing}
+          className="theme-btn active"
           style={{ 
-            background: isRefreshing ? 'rgba(255,255,255,0.05)' : 'hsl(var(--primary))',
-            border: 'none',
-            padding: '0.6rem 1.2rem',
-            borderRadius: '0.75rem',
-            color: 'white',
-            fontWeight: 600,
+            width: 'auto',
+            padding: '0 1rem',
+            height: '38px',
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            gap: '0.5rem',
+            borderRadius: '0.9rem',
             cursor: isRefreshing ? 'not-allowed' : 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem',
+            boxShadow: isRefreshing ? 'none' : '0 4px 12px -2px hsla(var(--primary), 0.4)',
             transition: 'all 0.3s ease'
           }}
         >
-          <svg 
-             width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" 
-             style={{ animation: isRefreshing ? 'spin 1s linear infinite' : 'none' }}
-          >
-            <path d="M23 4v6h-6M1.7 20a10 10 0 0 1 0-12A10 10 0 0 1 12 2a10 10 0 0 1 9.7 7" />
-            <path d="M1 20v-6h6M22.3 4a10 10 0 0 1 0 12A10 10 0 0 1 12 22a10 10 0 0 1-9.7-7" />
-          </svg>
-          {isRefreshing ? 'Actualizando...' : 'Refrescar'}
+          <RefreshCw size={14} strokeWidth={3} style={{ animation: isRefreshing ? 'spin 1.5s linear infinite' : 'none' }} />
+          <span>{isRefreshing ? '...' : 'Refrescar'}</span>
         </button>
       </div>
 
       <style>{`
-        @keyframes pulse {
-          0% { transform: scale(0.95); opacity: 0.5; }
-          50% { transform: scale(1.1); opacity: 1; }
-          100% { transform: scale(0.95); opacity: 0.5; }
-        }
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+          0% { opacity: 0.6; }
+          50% { opacity: 1; }
+          100% { opacity: 0.6; }
+        }
+        @media (max-width: 640px) {
+            .glass {
+                min-width: 200px;
+            }
         }
       `}</style>
     </div>
