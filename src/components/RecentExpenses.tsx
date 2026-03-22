@@ -23,7 +23,7 @@ const RecentExpenses: FC<RecentExpensesProps> = ({ data, arsRate }) => {
   return (
     <div className="glass animate-in stagger-2" style={{ 
       marginTop: '2rem', 
-      padding: '2rem', 
+      padding: 'var(--container-padding, 2rem)', 
       background: 'linear-gradient(135deg, var(--glass-bg) 0%, rgba(59, 130, 246, 0.1) 100%)' 
     }}>
       <div style={{ marginBottom: '1.5rem' }}>
@@ -85,8 +85,21 @@ const RecentExpenses: FC<RecentExpensesProps> = ({ data, arsRate }) => {
       </div>
       <style>{`
         @media (max-width: 768px) {
-            .dashboard-grid { grid-template-columns: 1fr !important; }
-            .glass { grid-column: span 1 !important; }
+            .dashboard-grid { 
+                grid-template-columns: 1fr !important; 
+                gap: 1.5rem !important;
+            }
+            .glass[style*="grid-column: span 4"] { 
+                grid-column: span 1 !important; 
+                width: 100% !important;
+            }
+            .glass:has(.modern-scroll) {
+                padding: 1rem !important;
+            }
+        }
+        @media (max-width: 640px) {
+            :root { --container-padding: 1rem; }
+            .modern-scroll { padding-right: 0 !important; }
         }
         .modern-scroll::-webkit-scrollbar {
             width: 5px;
