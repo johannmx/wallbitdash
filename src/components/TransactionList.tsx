@@ -103,11 +103,11 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ 
-              background: 'var(--input-bg)', 
-              border: '1px solid var(--input-border)',
+              background: 'hsl(var(--input-bg))', 
+              border: '1px solid hsla(var(--primary), 0.3)',
               padding: '0.65rem 1.5rem',
               borderRadius: '2rem',
-              color: 'var(--foreground)',
+              color: 'hsl(var(--foreground))',
               width: '100%',
               maxWidth: isMobile ? '100%' : '280px',
               fontSize: '0.9rem',
