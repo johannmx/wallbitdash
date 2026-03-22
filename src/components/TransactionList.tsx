@@ -105,13 +105,16 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
             style={{ 
               background: 'var(--input-bg)', 
               border: '1px solid var(--input-border)',
-              padding: '0.65rem 1.25rem',
-              borderRadius: '0.75rem',
+              padding: '0.65rem 1.5rem',
+              borderRadius: '2rem',
               color: 'var(--foreground)',
               width: '100%',
               maxWidth: isMobile ? '100%' : '280px',
-              fontSize: '0.9rem'
+              fontSize: '0.9rem',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              outline: 'none'
             }}
+            className="search-input"
           />
         </div>
       </div>
@@ -240,6 +243,14 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
       </div>
 
       <style>{`
+        .search-input:focus {
+          border-color: hsl(var(--primary)) !important;
+          box-shadow: 0 0 0 4px hsla(var(--primary), 0.15);
+          background: hsla(var(--foreground), 0.05) !important;
+        }
+        .search-input:hover {
+          border-color: hsla(var(--primary), 0.5);
+        }
         .transaction-list-container:hover {
           box-shadow: 0 12px 48px -12px rgba(0,0,0,0.4);
         }
