@@ -51,7 +51,7 @@ const RecentExpenses: FC<RecentExpensesProps> = ({ data, arsRate }) => {
         </div>
 
         {/* Mini List */}
-        <div style={{ gridColumn: 'span 8', maxHeight: '250px', overflowY: 'auto', paddingRight: '1rem' }}>
+        <div className="modern-scroll" style={{ gridColumn: 'span 8', maxHeight: '250px', overflowY: 'auto', paddingRight: '1rem' }}>
           {data.transactions.length === 0 ? (
             <div style={{ opacity: 0.3, textAlign: 'center', padding: '2rem' }}>No hay gastos en los últimos 7 días.</div>
           ) : (
@@ -87,6 +87,19 @@ const RecentExpenses: FC<RecentExpensesProps> = ({ data, arsRate }) => {
         @media (max-width: 768px) {
             .dashboard-grid { grid-template-columns: 1fr !important; }
             .glass { grid-column: span 1 !important; }
+        }
+        .modern-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+        .modern-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .modern-scroll::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.2);
+            border-radius: 10px;
+        }
+        .modern-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.5);
         }
       `}</style>
     </div>

@@ -171,9 +171,10 @@ const fetchWallbitData = async () => {
 
     // 5. Process Recent Expenses (Last 7 days)
     const sevenDaysAgo = new Date();
+    sevenDaysAgo.setHours(0, 0, 0, 0);
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const expenseTypes = ['card_spent', 'pay_qr', 'internal_transfer', 'wire_transfer_out', 'withdrawal', 'withdrawal local'];
+    const expenseTypes = ['card_spent', 'pay_qr', 'internal_transfer', 'wire_transfer_out', 'withdrawal', 'withdrawal_local'];
     
     const recentExpenses = mappedTxs.filter(tx => {
        const d = new Date(tx.date);
