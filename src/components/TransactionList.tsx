@@ -178,12 +178,12 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
           /* Desktop Table View */
           <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.4rem' }}>
             <thead style={{ position: 'sticky', top: 0, zIndex: 10, background: 'var(--header-bg)', backdropFilter: 'blur(20px)' }}>
-              <tr style={{ textAlign: 'left', opacity: 0.8, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer' }}>
-                <th style={{ padding: '1.25rem 1rem' }} onClick={() => handleSort('date')}>Fecha {sortField === 'date' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
-                <th onClick={() => handleSort('description')}>Descripción {sortField === 'description' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
-                <th onClick={() => handleSort('type')}>Tipo {sortField === 'type' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
-                <th onClick={() => handleSort('amount')}>Monto {sortField === 'amount' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
-                <th onClick={() => handleSort('status')}>Estado {sortField === 'status' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+              <tr style={{ textAlign: 'left', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', cursor: 'pointer', fontFamily: "'Outfit', sans-serif", fontWeight: 700 }}>
+                <th style={{ padding: '1.25rem 1rem', opacity: 0.5 }} onClick={() => handleSort('date')}>Fecha {sortField === 'date' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+                <th style={{ opacity: 0.5 }} onClick={() => handleSort('description')}>Descripción {sortField === 'description' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+                <th style={{ opacity: 0.5 }} onClick={() => handleSort('type')}>Tipo {sortField === 'type' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+                <th style={{ opacity: 0.5 }} onClick={() => handleSort('amount')}>Monto {sortField === 'amount' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+                <th style={{ opacity: 0.5 }} onClick={() => handleSort('status')}>Estado {sortField === 'status' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
               </tr>
             </thead>
             <tbody>
@@ -206,14 +206,25 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
                     borderRadius: '1rem',
                     opacity: isFailed ? 0.7 : 1
                   }}>
-                    <td style={{ padding: '0.85rem 1rem', borderTopLeftRadius: '1rem', borderBottomLeftRadius: '1rem', fontSize: '0.85rem', fontWeight: 500 }}>
+                    <td style={{ padding: '1rem', borderTopLeftRadius: '1rem', borderBottomLeftRadius: '1rem', fontSize: '0.8rem', fontWeight: 600, opacity: 0.5 }}>
                       {new Date(tx.date + 'T00:00:00Z').toLocaleDateString('es-ES')}
                     </td>
-                    <td style={{ fontSize: '0.85rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <td style={{ fontSize: '0.9rem', fontWeight: 700, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: "'Outfit', sans-serif" }}>
                       {tx.description || '-'}
                     </td>
-                    <td style={{ textTransform: 'capitalize', fontSize: '0.8rem', opacity: 0.6 }}>
-                      {tx.type.replace(/_/g, ' ').toLowerCase()}
+                    <td>
+                      <span style={{ 
+                        fontSize: '0.7rem', 
+                        opacity: 0.5, 
+                        background: 'hsla(var(--foreground), 0.05)', 
+                        padding: '0.2rem 0.6rem', 
+                        borderRadius: '0.5rem',
+                        textTransform: 'uppercase',
+                        fontWeight: 800,
+                        letterSpacing: '0.02em'
+                      }}>
+                        {tx.type.replace(/_/g, ' ').toLowerCase()}
+                      </span>
                     </td>
                     <td style={{ fontWeight: 700, color: amountColor, fontSize: '0.9rem' }}>
                       {expense ? '-' : '+'}${tx.amount} <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>{tx.currency}</span>
