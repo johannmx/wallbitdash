@@ -163,7 +163,7 @@ function App() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
         <BalanceCards checking={data.checking} stocks={data.stocks} showBalances={showBalances} />
-        <RecentExpenses data={data.recentExpenses} />
+        <RecentExpenses data={data.recentExpenses} arsRate={data.arsRate || 1000} />
         <AnalyticsCards transactions={data.transactions} arsRate={data.arsRate || 1000} />
         <TransactionList transactions={data.transactions} />
       </div>

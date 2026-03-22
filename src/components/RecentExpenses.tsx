@@ -16,9 +16,10 @@ interface RecentExpensesProps {
     currency: string;
     transactions: Expense[];
   };
+  arsRate: number;
 }
 
-const RecentExpenses: FC<RecentExpensesProps> = ({ data }) => {
+const RecentExpenses: FC<RecentExpensesProps> = ({ data, arsRate }) => {
   return (
     <div className="glass animate-in stagger-2" style={{ 
       marginTop: '2rem', 
@@ -43,8 +44,10 @@ const RecentExpenses: FC<RecentExpensesProps> = ({ data }) => {
           textAlign: 'center'
         }}>
           <div style={{ opacity: 0.6, fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Total Gastado (7 días)</div>
-          <div style={{ fontSize: '2.5rem', fontWeight: 700 }}>${data.totalSpent}</div>
-          <div style={{ opacity: 0.6, fontSize: '0.9rem' }}>Equivalente en USD</div>
+          <div style={{ fontSize: '2.5rem', fontWeight: 700 }}>${data.totalSpent} USD</div>
+          <div style={{ opacity: 0.6, fontSize: '0.9rem' }}>
+            Equivalente aprox en ARS: ${(parseFloat(data.totalSpent) * arsRate).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
         </div>
 
         {/* Mini List */}

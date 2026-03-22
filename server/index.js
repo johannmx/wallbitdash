@@ -173,7 +173,7 @@ const fetchWallbitData = async () => {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const expenseTypes = ['card_spent', 'pay_qr', 'internal_transfer', 'wire_transfer_out', 'withdrawal'];
+    const expenseTypes = ['card_spent', 'pay_qr', 'internal_transfer', 'wire_transfer_out', 'withdrawal', 'withdrawal local'];
     
     const recentExpenses = mappedTxs.filter(tx => {
        const d = new Date(tx.date);
