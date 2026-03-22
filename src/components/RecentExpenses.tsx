@@ -67,24 +67,42 @@ const RecentExpenses: FC<RecentExpensesProps> = ({ data, arsRate }) => {
               <div key={i} style={{ 
                 display: 'flex', 
                 justifyContent: 'space-between', 
-                padding: '0.75rem 0', 
-                borderBottom: '1px solid var(--border)',
+                alignItems: 'center',
+                padding: '1rem 0', 
+                borderBottom: '1px solid hsla(var(--foreground), 0.05)',
                 fontSize: '0.9rem',
                 opacity: tx.status === 'PENDING' ? 0.7 : 1
               }}>
-                <div>
-                  <div style={{ fontWeight: 500 }}>{tx.description}</div>
-                  <div style={{ opacity: 0.4, fontSize: '0.75rem' }}>
-                    {new Date(tx.date + 'T00:00:00Z').toLocaleDateString('es-ES', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric'
-                    })}
-                    {tx.status === 'PENDING' && <span style={{ marginLeft: '0.5rem', color: 'hsl(var(--warning))' }}>(Pendiente)</span>}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                  <div style={{ fontWeight: 700, fontFamily: "'Outfit', sans-serif", fontSize: '0.95rem' }}>
+                    {tx.description}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <span style={{ opacity: 0.4, fontSize: '0.75rem', fontWeight: 500 }}>
+                      {new Date(tx.date + 'T00:00:00Z').toLocaleDateString('es-ES')}
+                    </span>
+                    {tx.status === 'PENDING' && (
+                      <span style={{ 
+                        fontSize: '0.6rem', 
+                        padding: '0.15rem 0.4rem', 
+                        borderRadius: '0.4rem', 
+                        background: 'hsla(var(--warning), 0.1)', 
+                        color: 'hsl(var(--warning))',
+                        fontWeight: 800,
+                        textTransform: 'uppercase'
+                      }}>
+                        Pendiente
+                      </span>
+                    )}
                   </div>
                 </div>
-                <div style={{ fontWeight: 600, color: tx.status === 'PENDING' ? 'hsl(var(--warning))' : 'hsl(var(--error))' }}>
-                  -{tx.amount} {tx.currency}
+                <div style={{ 
+                  fontWeight: 800, 
+                  fontFamily: "'Outfit', sans-serif",
+                  fontSize: '1.05rem',
+                  color: tx.status === 'PENDING' ? 'hsl(var(--warning))' : 'hsl(var(--error))' 
+                }}>
+                  -${tx.amount} <span style={{ fontSize: '0.7rem', opacity: 0.4 }}>{tx.currency}</span>
                 </div>
               </div>
             ))
