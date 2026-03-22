@@ -103,8 +103,8 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ 
-              background: 'hsl(var(--input-bg))', 
-              border: '1px solid hsla(var(--primary), 0.3)',
+              background: 'hsla(var(--primary), 0.08)', 
+              border: '2px solid hsl(var(--primary))',
               padding: '0.65rem 1.5rem',
               borderRadius: '2rem',
               color: 'hsl(var(--foreground))',
@@ -112,7 +112,8 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
               maxWidth: isMobile ? '100%' : '280px',
               fontSize: '0.9rem',
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              outline: 'none'
+              outline: 'none',
+              boxShadow: '0 4px 12px -2px hsla(var(--primary), 0.2)'
             }}
             className="search-input"
           />
@@ -245,11 +246,12 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
       <style>{`
         .search-input:focus {
           border-color: hsl(var(--primary)) !important;
-          box-shadow: 0 0 0 4px hsla(var(--primary), 0.15);
-          background: hsla(var(--foreground), 0.05) !important;
+          box-shadow: 0 0 0 4px hsla(var(--primary), 0.25);
+          background: hsla(var(--primary), 0.12) !important;
         }
         .search-input:hover {
-          border-color: hsla(var(--primary), 0.5);
+          background: hsla(var(--primary), 0.1) !important;
+          box-shadow: 0 4px 15px -1px hsla(var(--primary), 0.3);
         }
         .transaction-list-container:hover {
           box-shadow: 0 12px 48px -12px rgba(0,0,0,0.4);
