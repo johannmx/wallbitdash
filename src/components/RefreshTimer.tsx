@@ -47,13 +47,13 @@ const RefreshTimer: FC<RefreshTimerProps> = ({ onRefresh }) => {
   };
 
   return (
-    <div className="glass" style={{ 
+    <div className="glass refresh-timer-capsule" style={{ 
       display: 'flex', 
       padding: '0.35rem', 
       borderRadius: '1.25rem', 
       alignItems: 'center', 
       gap: '1rem',
-      minWidth: '280px'
+      minWidth: 'min(280px, 100%)'
     }}>
       {/* Visual Progress Bar Section (Integrated into the capsule) */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.2rem', paddingLeft: '0.75rem' }}>
@@ -120,8 +120,8 @@ const RefreshTimer: FC<RefreshTimerProps> = ({ onRefresh }) => {
           100% { opacity: 0.6; }
         }
         @media (max-width: 640px) {
-            .glass {
-                min-width: 200px;
+            .refresh-timer-capsule {
+                min-width: 180px;
             }
         }
       `}</style>

@@ -140,7 +140,8 @@ h1, h2, h3, h4, .brand-font {
   
   .header-actions {
     gap: 0.5rem !important;
-    flex-wrap: nowrap !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-end;
   }
 
   .glass {
