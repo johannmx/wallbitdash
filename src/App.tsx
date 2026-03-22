@@ -162,7 +162,7 @@ function App() {
       </header>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-        <BalanceCards checking={data.checking} stocks={data.stocks} showBalances={showBalances} />
+        <BalanceCards checking={data.checking} stocks={data.stocks} showBalances={showBalances} arsRate={data.arsRate || 1000} />
         <RecentExpenses data={data.recentExpenses} arsRate={data.arsRate || 1000} />
         <AnalyticsCards transactions={data.transactions} arsRate={data.arsRate || 1000} />
         <TransactionList transactions={data.transactions} />
