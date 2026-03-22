@@ -1,5 +1,5 @@
 node_modules
-dist
+# dist removed to allow CI build from host
 .git
 .env
 backend-data
