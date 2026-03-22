@@ -159,15 +159,23 @@ const fetchWallbitData = async () => {
     const txsRaw = await fetchAllTransactions(headers);
     
     // 4. Map Transactions
-    const mappedTxs = txsRaw.map(tx => ({
-      uuid: tx.uuid,
-      type: tx.type,
-      amount: tx.source_amount || tx.amount,
-      currency: (tx.source_currency?.code || tx.currency || 'USD'),
-      status: tx.status,
-      date: (tx.created_at || tx.date).split('T')[0],
-      description: (tx.external_address || tx.comment || tx.description || '').trim()
-    }));
+    const mappedTxs = txsRaw.map(tx => {
+      let desc = (tx.external_address || tx.comment || tx.description || '').trim();
+      if (!desc) {
+        if (tx.type === 'WITHDRAWAL_LOCAL') desc = 'Retiro local';
+        else if (tx.type === 'INVESTMENT_WITHDRAWAL') desc = 'Retiro de inversión';
+        else if (tx.type === 'INVESTMENT_DEPOSIT') desc = 'Depósito de inversión';
+      }
+      return {
+        uuid: tx.uuid,
+        type: tx.type,
+        amount: tx.source_amount || tx.amount,
+        currency: (tx.source_currency?.code || tx.currency || 'USD'),
+        status: tx.status,
+        date: (tx.created_at || tx.date).split('T')[0],
+        description: desc
+      };
+    });
 
     // 5. Process Recent Expenses (Last 7 days)
     const sevenDaysAgo = new Date();
