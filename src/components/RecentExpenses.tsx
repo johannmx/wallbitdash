@@ -35,18 +35,26 @@ const RecentExpenses: FC<RecentExpensesProps> = ({ data, arsRate }) => {
         {/* Summary Card */}
         <div className="glass" style={{ 
           gridColumn: 'span 4',
-          padding: '1.5rem', 
-          background: 'var(--summary-bg)', 
+          padding: '2rem', 
           display: 'flex', 
           flexDirection: 'column', 
-          justifyContent: 'center', 
+          justifyContent: 'center',
           alignItems: 'center',
           textAlign: 'center'
         }}>
-          <div style={{ opacity: 0.6, fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Total Gastado (7 días)</div>
-          <div style={{ fontSize: '2.5rem', fontWeight: 700 }}>${data.totalSpent} USD</div>
-          <div style={{ opacity: 0.6, fontSize: '0.9rem' }}>
-            Equivalente aprox en ARS: ${(parseFloat(data.totalSpent) * arsRate).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          <h3 style={{ opacity: 0.5, fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '0.05em' }}>Total Gastado (7 días)</h3>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '1.5rem' }}>
+            <span style={{ fontSize: '3rem', fontWeight: 700 }} className="gradient-text">
+              ${data.totalSpent}
+            </span>
+            <span style={{ opacity: 0.6 }}>USD</span>
+          </div>
+
+          <div style={{ paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', width: '100%' }}>
+            <div style={{ fontSize: '0.75rem', opacity: 0.5, marginBottom: '0.5rem' }}>Equivalente aprox en ARS</div>
+            <div style={{ fontWeight: 800, color: 'hsl(var(--primary))', fontSize: '1.1rem' }}>
+              ${(parseFloat(data.totalSpent) * arsRate).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
           </div>
         </div>
 
