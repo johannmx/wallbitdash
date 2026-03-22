@@ -1,5 +1,6 @@
 # Backend Production Stage
 FROM node:20-alpine
+ARG TARGETPLATFORM
 WORKDIR /app
 COPY package*.json ./
 RUN npm install --omit=dev --legacy-peer-deps
