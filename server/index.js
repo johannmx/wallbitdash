@@ -216,7 +216,7 @@ const fetchWallbitData = async () => {
   }
 };
 
-cron.schedule('*/15 * * * *', fetchWallbitData);
+cron.schedule('*/5 * * * *', fetchWallbitData);
 fetchWallbitData();
 
 app.get('/api/dashboard', authMiddleware, (req, res) => {
