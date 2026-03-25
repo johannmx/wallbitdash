@@ -15,11 +15,22 @@ services:
     environment:
       - NODE_ENV=production
       - WALLBIT_API_KEY=${WALLBIT_API_KEY}
+      - DASHBOARD_TOKEN=${DASHBOARD_TOKEN}
       - DATA_PATH=/app/data/data.json
     volumes:
-      - /var/lib/wallbitdash/data:/app/data
+      - ./backend-data:/app/data
+    depends_on:
+      init-permissions:
+        condition: service_completed_successfully
     networks:
       - wallbit-net
+
+  init-permissions:
+    image: busybox
+    user: root
+    volumes:
+      - ./backend-data:/app/data
+    command: chown -R 1000:1000 /app/data
 
 networks:
   wallbit-net:

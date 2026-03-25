@@ -28,6 +28,14 @@ docker compose -f docker-compose.prod.yml up -d
 ```
 Esto levantará el frontend en el puerto **80** (estándar HTTP) y el backend internamente.
 
+### 4. Variables de Entorno
+Crea un archivo `.env` en la raíz del proyecto para mayor seguridad:
+```env
+WALLBIT_API_KEY=tu_api_key_aqui
+DASHBOARD_TOKEN=un_token_seguro_para_tu_dashboard
+```
+El `DASHBOARD_TOKEN` es esencial para proteger el acceso a tus datos financieros desde el dashboard.
+
 ## 4. Configurar Cloudflare Tunnel
 Para exponer el proyecto públicamente sin abrir puertos en tu router/firewall:
 
