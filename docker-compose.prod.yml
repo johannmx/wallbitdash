@@ -12,6 +12,7 @@ services:
   backend:
     image: ghcr.io/johannmx/wallbitdash-backend:latest
     restart: always
+    user: "1000:1000"
     environment:
       - NODE_ENV=production
       - WALLBIT_API_KEY=${WALLBIT_API_KEY}

@@ -8,12 +8,15 @@ import RefreshTimer from './components/RefreshTimer';
 import { wallbitData } from './data/mockData';
 
 const API_URL = '/api/dashboard';
-const DASHBOARD_TOKEN = import.meta.env.VITE_DASHBOARD_TOKEN || '';
+const BUILD_TOKEN = import.meta.env.VITE_DASHBOARD_TOKEN || '';
 
-const getHeaders = () => ({
-  'Content-Type': 'application/json',
-  ...(DASHBOARD_TOKEN ? { 'X-Dashboard-Token': DASHBOARD_TOKEN } : {})
-});
+const getHeaders = () => {
+  const token = localStorage.getItem('dashboard_token') || BUILD_TOKEN;
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'X-Dashboard-Token': token } : {})
+  };
+};
 
 interface DashboardData {
   checking: { balance: string; currency: string };
@@ -47,6 +50,8 @@ function App() {
   const [data, setData] = useState<DashboardData>(initialState);
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('theme') as Theme) || 'system');
   const [showBalances, setShowBalances] = useState(true);
+  const [isLocked, setIsLocked] = useState(false);
+  const [tokenInput, setTokenInput] = useState('');
 
   // Theme effect
   useEffect(() => {
@@ -67,26 +72,44 @@ function App() {
   }, [theme]);
 
   // Data fetch
-  useEffect(() => {
-    const fetchInitial = async () => {
-      try {
-        const res = await fetch(API_URL, { headers: getHeaders() });
-        if (res.ok) {
-          const freshData = await res.json();
-          setData(freshData);
-        }
-      } catch (e) {
-        console.warn('⚠️ Cache server not running yet, using local mockData.');
+  const fetchDashboard = async () => {
+    try {
+      const res = await fetch(API_URL, { headers: getHeaders() });
+      if (res.status === 401) {
+        setIsLocked(true);
+        return;
       }
-    };
-    fetchInitial();
+      if (res.ok) {
+        const freshData = await res.json();
+        setData(freshData);
+        setIsLocked(false);
+      }
+    } catch (e) {
+      console.warn('⚠️ Cache server not running yet, using local mockData.');
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboard();
   }, []);
+
+  const handleSaveToken = () => {
+    if (tokenInput.trim()) {
+      localStorage.setItem('dashboard_token', tokenInput.trim());
+      setIsLocked(false);
+      fetchDashboard();
+    }
+  };
 
   const handleRefresh = async () => {
     try {
-      const result = await fetch(API_URL, { headers: getHeaders() });
-      if (!result.ok) throw new Error('Refresh failed');
-      const freshData = await result.json();
+      const res = await fetch(API_URL, { headers: getHeaders() });
+      if (res.status === 401) {
+        setIsLocked(true);
+        throw new Error('Unauthorized');
+      }
+      if (!res.ok) throw new Error('Refresh failed');
+      const freshData = await res.json();
       setData({ ...freshData });
       return true;
     } catch (error) {
@@ -94,6 +117,67 @@ function App() {
       throw error; 
     }
   };
+
+  if (isLocked) {
+    return (
+      <div style={{ 
+        height: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        padding: '2rem'
+      }}>
+        <div className="glass animate-in" style={{ 
+          maxWidth: '400px', 
+          width: '100%', 
+          padding: '3rem', 
+          textAlign: 'center',
+          borderRadius: '2rem'
+        }}>
+          <div className="gradient-text" style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>🔒</div>
+          <h2 style={{ marginBottom: '1rem' }}>Backend Protegido</h2>
+          <p style={{ opacity: 0.6, marginBottom: '2rem', fontSize: '0.9rem' }}>
+            Este dashboard está configurado con seguridad. Por favor ingresa tu <b>DASHBOARD_TOKEN</b> para continuar.
+          </p>
+          <input 
+            type="password" 
+            placeholder="Ingresa tu token aquí..."
+            value={tokenInput}
+            onChange={(e) => setTokenInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSaveToken()}
+            className="glass"
+            style={{ 
+              width: '100%', 
+              padding: '1rem 1.5rem', 
+              borderRadius: '1rem', 
+              border: '1px solid hsla(var(--foreground), 0.1)',
+              background: 'hsla(var(--foreground), 0.03)',
+              marginBottom: '1.5rem',
+              textAlign: 'center',
+              fontSize: '1rem'
+            }}
+          />
+          <button 
+            onClick={handleSaveToken}
+            className="glass"
+            style={{ 
+              width: '100%', 
+              padding: '1rem', 
+              borderRadius: '1.25rem', 
+              background: 'hsl(var(--primary))', 
+              color: 'white',
+              fontWeight: 700,
+              cursor: 'pointer',
+              border: 'none',
+              boxShadow: '0 10px 20px -5px hsla(var(--primary), 0.4)'
+            }}
+          >
+            Desbloquear Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <main className="animate-in" style={{ padding: 'max(1.5rem, 3vw)', maxWidth: '1440px', margin: '0 auto' }}>
