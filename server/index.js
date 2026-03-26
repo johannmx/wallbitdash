@@ -25,6 +25,7 @@ const dataTemplate = {
 };
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = 3001;
 const DATA_PATH = process.env.DATA_PATH || path.join(__dirname, '../data/data.json');
 const API_KEY = process.env.WALLBIT_API_KEY;
