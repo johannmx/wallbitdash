@@ -191,17 +191,19 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                activeIndex={activeIndex}
-                activeShape={renderActiveShape}
-                data={expenseBreakdown}
-                cx="50%"
-                cy="50%"
-                innerRadius={55}
-                outerRadius={75}
-                paddingAngle={5}
-                dataKey="value"
-                onMouseEnter={onPieEnter}
-                onMouseLeave={onPieLeave}
+                {...({
+                  activeIndex,
+                  activeShape: renderActiveShape,
+                  data: expenseBreakdown,
+                  cx: "50%",
+                  cy: "50%",
+                  innerRadius: 55,
+                  outerRadius: 75,
+                  paddingAngle: 5,
+                  dataKey: "value",
+                  onMouseEnter: onPieEnter,
+                  onMouseLeave: onPieLeave
+                } as any)}
               >
                 {expenseBreakdown.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="var(--background)" strokeWidth={2} />
