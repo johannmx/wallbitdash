@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -64,9 +65,11 @@ if (!fs.existsSync(dataDir)) {
 
 // Cache state
 let cache = dataTemplate;
+let persistenceExists = false;
 
 // Load from persistence if available
 if (fs.existsSync(DATA_PATH)) {
+  persistenceExists = true;
   try {
     const savedData = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'));
     cache = { ...dataTemplate, ...savedData };
@@ -79,6 +82,7 @@ if (fs.existsSync(DATA_PATH)) {
 const saveToPersistence = () => {
   try {
     fs.writeFileSync(DATA_PATH, JSON.stringify(cache, null, 2));
+    persistenceExists = true;
     console.log('💾 Data persisted to disk.');
   } catch (e) {
     console.error('❌ Persistence error:', e.message);
@@ -219,12 +223,20 @@ const fetchWallbitData = async () => {
 cron.schedule('*/5 * * * *', fetchWallbitData);
 fetchWallbitData();
 
-app.get('/api/dashboard', authMiddleware, (req, res) => {
+const dashboardLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' }
+});
+
+app.get('/api/dashboard', dashboardLimiter, authMiddleware, (req, res) => {
   res.json({
     ...cache,
     _cacheInfo: {
       lastUpdated: cache.lastUpdated || 'Never',
-      persistent: fs.existsSync(DATA_PATH)
+      persistent: persistenceExists
     }
   });
 });
