@@ -189,7 +189,7 @@ function App() {
           <p style={{ opacity: 0.5, fontSize: '1rem', fontWeight: 500 }}>wallbit personal dashboard</p>
         </div>
         
-        <div className="header-actions" style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', flexWrap: 'nowrap' }}>
+        <div className="header-actions" style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           {/* Balance Visibility Toggle */}
           <div className="glass" style={{ display: 'flex', padding: '0.3rem', borderRadius: '1rem' }}>
             <button 
@@ -238,7 +238,8 @@ function App() {
             alignItems: 'center', 
             justifyContent: 'center', 
             overflow: 'hidden',
-            color: 'hsl(var(--primary))'
+            color: 'hsl(var(--primary))',
+            flexShrink: 0
           }}>
             <Wallet size={32} strokeWidth={2.5} />
           </div>

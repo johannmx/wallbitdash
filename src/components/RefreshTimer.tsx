@@ -53,10 +53,10 @@ const RefreshTimer: FC<RefreshTimerProps> = ({ onRefresh }) => {
       borderRadius: '1.25rem', 
       alignItems: 'center', 
       gap: '1rem',
-      minWidth: 'min(280px, 100%)'
+      minWidth: 'min(240px, 100%)'
     }}>
       {/* Visual Progress Bar Section (Integrated into the capsule) */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.2rem', paddingLeft: '0.75rem' }}>
+      <div className="timer-progress-section" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.2rem', paddingLeft: '0.75rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.6rem', fontWeight: 800, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
           <span>Sync</span>
           <span>{formatTime(timeLeft)}</span>
@@ -121,7 +121,11 @@ const RefreshTimer: FC<RefreshTimerProps> = ({ onRefresh }) => {
         }
         @media (max-width: 640px) {
             .refresh-timer-capsule {
-                min-width: 180px;
+                min-width: 140px;
+                gap: 0.5rem;
+            }
+            .timer-progress-section {
+                display: none !important;
             }
         }
       `}</style>
