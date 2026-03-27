@@ -9,7 +9,7 @@ import DolarPill from './components/DolarPill';
 import { wallbitData } from './data/mockData';
 
 const API_URL = '/api/dashboard';
-const BUILD_TOKEN = import.meta.env.VITE_DASHBOARD_TOKEN || '';
+const BUILD_TOKEN = import.meta.env.DASHBOARD_TOKEN || '';
 
 const getHeaders = () => {
   const token = localStorage.getItem('dashboard_token') || BUILD_TOKEN;

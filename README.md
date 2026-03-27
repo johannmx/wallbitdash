@@ -37,9 +37,10 @@ Un dashboard moderno y premium para visualizar tus activos y transacciones de **
 Si quieres levantarlo usando las imágenes ya compiladas en GHCR:
 
 1. Clona el repositorio.
-2. Configura tu variable de entorno en tu terminal o en un archivo `.env`:
+2. Configura tus variables de entorno en tu terminal o en un archivo `.env`:
    ```bash
    export WALLBIT_API_KEY=tu_api_key_aqui
+   export DASHBOARD_TOKEN=un_token_seguro_aqui
    ```
 3. Ejecuta:
    ```bash
@@ -53,9 +54,9 @@ Para trabajar en el código base:
    ```bash
    npm install
    ```
-2. Define tu API Key y corre ambos servidores simultáneamente:
+2. Define tu API Key, el token y corre ambos servidores simultáneamente:
    ```bash
-   WALLBIT_API_KEY=tu_api_key_aqui npm run dev
+   WALLBIT_API_KEY=tu_api_key_aqui DASHBOARD_TOKEN=tu_token_aqui npm run dev
    ```
    El frontend estará en `http://localhost:5173` y el backend en `http://localhost:3001`.
 

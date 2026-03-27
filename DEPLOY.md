@@ -36,7 +36,7 @@ DASHBOARD_TOKEN=un_token_seguro_para_tu_dashboard
 ```
 El `DASHBOARD_TOKEN` es esencial para proteger el acceso a tus datos financieros desde el dashboard. 
 
-**Nota**: Si utilizas la imagen de Docker pre-construida, el frontend te pedirá el token la primera vez que entres y lo guardará en tu navegador de forma segura.
+**Nota de Seguridad**: Nunca uses el prefijo `VITE_` para el token en el archivo `.env`, ya que eso lo expondría públicamente en el código compilado del navegador. Al entrar por primera vez, el sistema te pedirá el token manualmente y lo guardará en tu navegador de forma segura.
 
 ## 4. Configurar Cloudflare Tunnel
 Para exponer el proyecto públicamente sin abrir puertos en tu router/firewall:
