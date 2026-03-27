@@ -5,6 +5,7 @@ import TransactionList from './components/TransactionList';
 import RecentExpenses from './components/RecentExpenses';
 import AnalyticsCards from './components/AnalyticsCards';
 import RefreshTimer from './components/RefreshTimer';
+import DolarPill from './components/DolarPill';
 import { wallbitData } from './data/mockData';
 
 const API_URL = '/api/dashboard';
@@ -230,6 +231,7 @@ function App() {
           </div>
 
           <RefreshTimer onRefresh={handleRefresh} />
+          <DolarPill />
           
           <div className="glass logo-container" style={{ 
             width: '56px', 
