@@ -58,10 +58,10 @@ const RefreshTimer: FC<RefreshTimerProps> = ({ onRefresh }) => {
       {/* Visual Progress Bar Section (Integrated into the capsule) */}
       <div className="timer-progress-section" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.2rem', paddingLeft: '0.75rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.6rem', fontWeight: 800, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-          <span>Sync</span>
-          <span>{formatTime(timeLeft)}</span>
+          <span className="sync-label">Sync</span>
+          <span className="timer-countdown">{formatTime(timeLeft)}</span>
         </div>
-        <div style={{ 
+        <div className="progress-bar-container" style={{ 
           height: '4px', 
           width: '100%', 
           borderRadius: '10px', 
@@ -105,7 +105,7 @@ const RefreshTimer: FC<RefreshTimerProps> = ({ onRefresh }) => {
           }}
         >
           <RefreshCw size={14} strokeWidth={3} style={{ animation: isRefreshing ? 'spin 1.5s linear infinite' : 'none' }} />
-          <span>{isRefreshing ? '...' : 'Refrescar'}</span>
+          <span className="refresh-text">{isRefreshing ? '...' : 'Refrescar'}</span>
         </button>
       </div>
 
@@ -121,11 +121,29 @@ const RefreshTimer: FC<RefreshTimerProps> = ({ onRefresh }) => {
         }
         @media (max-width: 640px) {
             .refresh-timer-capsule {
-                min-width: 140px;
+                min-width: unset;
+                width: auto;
                 gap: 0.5rem;
+                padding-right: 0.5rem !important;
+            }
+            .sync-label, .progress-bar-container {
+                display: none !important;
+            }
+            .timer-countdown {
+                font-size: 0.8rem;
+                opacity: 0.8 !important;
             }
             .timer-progress-section {
+                padding-left: 0.5rem !important;
+                flex: none !important;
+            }
+        }
+        @media (max-width: 420px) {
+            .refresh-text {
                 display: none !important;
+            }
+            .theme-btn.active {
+                padding: 0 0.8rem !important;
             }
         }
       `}</style>
