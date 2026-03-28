@@ -212,9 +212,7 @@ function App() {
           alignItems: 'center', 
           padding: '0.5rem 0.75rem', 
           borderRadius: '1.25rem',
-          overflow: 'hidden',
-          flexShrink: 1,
-          minWidth: 0
+          flexShrink: 0
         }}>
           {/* Action Group */}
           <div style={{ display: 'flex', gap: '0.25rem', paddingRight: '0.75rem', borderRight: '1px solid var(--border)' }}>
