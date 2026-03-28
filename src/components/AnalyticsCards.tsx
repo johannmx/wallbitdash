@@ -232,7 +232,10 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
       <style>{`
         @media (max-width: 992px) {
           .analytics-container { grid-template-columns: 1fr !important; }
-          .glass { grid-column: span 12 !important; }
+          .glass { 
+            grid-column: span 12 !important; 
+            padding: var(--space-item) 1.25rem !important;
+          }
         }
       `}</style>
     </div>

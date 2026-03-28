@@ -1,5 +1,5 @@
-import type { FC } from 'react';
-import { useState, useMemo, useEffect } from 'react';
+import { type FC, useState, useMemo, useEffect } from 'react';
+import { Search } from 'lucide-react';
 
 type Transaction = {
   uuid: string;
@@ -104,25 +104,37 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
         </div>
         
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: isMobile ? '100%' : 'auto' }}>
-          <input 
-            type="text" 
-            placeholder="Search records..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ 
-              background: 'hsla(var(--foreground), 0.05)', 
-              border: '1px solid var(--border)',
-              padding: '0.85rem 1.5rem',
-              borderRadius: '1rem',
-              color: 'hsl(var(--foreground))',
-              width: '100%',
-              maxWidth: isMobile ? '100%' : '320px',
-              fontSize: '0.95rem',
-              transition: 'all 0.2s ease',
-              outline: 'none',
-            }}
-            className="search-input-new"
-          />
+          <div style={{ position: 'relative', width: '100%', maxWidth: isMobile ? '100%' : '320px' }}>
+            <Search 
+              size={18} 
+              style={{ 
+                position: 'absolute', 
+                left: '1.25rem', 
+                top: '50%', 
+                transform: 'translateY(-50%)', 
+                opacity: 0.3,
+                pointerEvents: 'none'
+              }} 
+            />
+            <input 
+              type="text" 
+              placeholder="Buscar registros..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{ 
+                background: 'hsla(var(--foreground), 0.05)', 
+                border: '1px solid var(--border)',
+                padding: '0.85rem 1.5rem 0.85rem 3.25rem',
+                borderRadius: '1rem',
+                color: 'hsl(var(--foreground))',
+                width: '100%',
+                fontSize: '0.95rem',
+                transition: 'all 0.3s var(--ease-out-expo)',
+                outline: 'none',
+              }}
+              className="search-input-new"
+            />
+          </div>
         </div>
       </div>
       
@@ -262,14 +274,13 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
       </div>
 
       <style>{`
-        .search-input:focus {
-          border-color: hsl(var(--primary)) !important;
-          box-shadow: 0 0 0 4px hsla(var(--primary), 0.25);
-          background: hsla(var(--primary), 0.12) !important;
+        .search-input-new:focus {
+          border-color: hsla(var(--primary), 0.5) !important;
+          background: hsla(var(--foreground), 0.08) !important;
+          box-shadow: 0 0 0 4px hsla(var(--primary), 0.1);
         }
-        .search-input:hover {
-          background: hsla(var(--primary), 0.1) !important;
-          box-shadow: 0 4px 15px -1px hsla(var(--primary), 0.3);
+        .search-input-new:hover {
+          background: hsla(var(--foreground), 0.07) !important;
         }
         .transaction-list-container:hover {
           box-shadow: 0 12px 48px -12px rgba(0,0,0,0.4);

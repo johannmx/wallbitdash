@@ -193,12 +193,15 @@ h1, h2, h3, h4, .brand-font {
     padding: 1rem !important;
     gap: 0.5rem !important;
     width: 100% !important;
+    align-items: flex-start !important;
   }
   
   .header-actions {
     gap: 0.5rem !important;
     flex-wrap: wrap !important;
     justify-content: flex-end;
+    flex: 0 1 auto;
+    max-width: 100%;
   }
 
   .glass {
@@ -209,6 +212,13 @@ h1, h2, h3, h4, .brand-font {
 @media (max-width: 480px) {
     .header-content {
         padding: 0.75rem !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center;
+    }
+    .header-actions {
+        justify-content: center !important;
+        width: 100% !important;
     }
 }
 

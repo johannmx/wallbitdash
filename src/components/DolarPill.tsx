@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FC } from 'react';
 
 interface DolarRate {
   moneda: string;
@@ -9,7 +9,11 @@ interface DolarRate {
   fechaActualizacion: string;
 }
 
-const DolarPill = () => {
+interface DolarPillProps {
+  isHeader?: boolean;
+}
+
+const DolarPill: FC<DolarPillProps> = ({ isHeader = false }) => {
   const [oficial, setOficial] = useState<number | null>(null);
   const [ccl, setCcl] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,15 +48,18 @@ const DolarPill = () => {
   if (loading || (!oficial && !ccl)) return null;
 
   return (
-    <div className="glass dolar-pill" style={{ 
+    <div className={!isHeader ? "glass dolar-pill" : "dolar-pill"} style={{ 
       display: 'flex', 
-      padding: '0.35rem 1rem', 
+      padding: isHeader ? '0' : '0.35rem 1rem', 
+      background: isHeader ? 'transparent' : undefined,
+      border: isHeader ? 'none' : undefined,
+      boxShadow: isHeader ? 'none' : undefined,
       borderRadius: '1.25rem', 
       alignItems: 'center', 
-      gap: '0.75rem',
+      gap: isHeader ? '1rem' : '0.75rem',
       fontSize: '0.85rem',
       fontWeight: 800,
-      height: '40px'
+      height: isHeader ? 'auto' : '40px'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
         <span style={{ color: 'hsl(var(--muted))', fontSize: '0.65rem', letterSpacing: '0.05em' }}>OFI</span>
