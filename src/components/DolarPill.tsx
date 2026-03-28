@@ -56,19 +56,21 @@ const DolarPill: FC<DolarPillProps> = ({ isHeader = false }) => {
       boxShadow: isHeader ? 'none' : undefined,
       borderRadius: '1.25rem', 
       alignItems: 'center', 
-      gap: isHeader ? '1rem' : '0.75rem',
-      fontSize: '0.85rem',
+      gap: isHeader ? '0.75rem' : '0.5rem',
+      fontSize: '0.7rem',
       fontWeight: 800,
-      height: isHeader ? 'auto' : '40px'
+      height: isHeader ? 'auto' : '40px',
+      whiteSpace: 'nowrap',
+      flexShrink: 0
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-        <span style={{ color: 'hsl(var(--muted))', fontSize: '0.65rem', letterSpacing: '0.05em' }}>OFI</span>
-        <span>${oficial?.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+        <span style={{ color: 'hsl(var(--muted))', fontSize: '0.6rem', letterSpacing: '0.05em' }}>OFI</span>
+        <span>${oficial?.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
       </div>
-      <div style={{ width: '1px', height: '16px', background: 'hsla(var(--foreground), 0.1)', margin: '0 0.1rem' }} />
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-        <span className="gradient-text" style={{ fontSize: '0.65rem', letterSpacing: '0.05em' }}>CCL</span>
-        <span>${ccl?.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+      <div style={{ width: '1px', height: '14px', background: 'hsla(var(--foreground), 0.1)' }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+        <span className="gradient-text" style={{ fontSize: '0.6rem', letterSpacing: '0.05em' }}>CCL</span>
+        <span>${ccl?.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
       </div>
       <style>{`
         @media (max-width: 640px) {

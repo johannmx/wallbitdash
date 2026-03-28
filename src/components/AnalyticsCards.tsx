@@ -231,10 +231,25 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
 
       <style>{`
         @media (max-width: 992px) {
-          .analytics-container { grid-template-columns: 1fr !important; }
-          .glass { 
-            grid-column: span 12 !important; 
-            padding: var(--space-item) 1.25rem !important;
+          .analytics-container { 
+            grid-template-columns: 1fr !important;
+            max-width: 100% !important; 
+            overflow: hidden !important;
+          }
+          .analytics-container > .glass { 
+            grid-column: span 1 !important; 
+            padding: var(--space-item) 1rem !important;
+            max-width: 100% !important;
+            overflow: hidden !important;
+          }
+          .recharts-legend-wrapper {
+            width: 100% !important;
+          }
+          .recharts-default-legend {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            gap: 0.25rem !important;
           }
         }
       `}</style>

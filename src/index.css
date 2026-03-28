@@ -188,38 +188,41 @@ h1, h2, h3, h4, .brand-font {
 /* Responsive Header Overrides */
 @media (max-width: 768px) {
   .header-content {
-    flex-direction: row !important;
-    justify-content: space-between !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
     padding: 1rem !important;
-    gap: 0.5rem !important;
+    gap: 1rem !important;
     width: 100% !important;
-    align-items: flex-start !important;
   }
   
   .header-actions {
     gap: 0.5rem !important;
-    flex-wrap: wrap !important;
-    justify-content: flex-end;
-    flex: 0 1 auto;
-    max-width: 100%;
+    width: 100% !important;
+    justify-content: space-between !important;
+    overflow: hidden !important;
+    flex-wrap: nowrap !important;
   }
 
   .glass {
     border-radius: 1.25rem;
   }
+
+  /* Prevent analytics from overflowing */
+  .analytics-container {
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
 }
 
 @media (max-width: 480px) {
-    .header-content {
-        padding: 0.75rem !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        text-align: center;
-    }
-    .header-actions {
-        justify-content: center !important;
-        width: 100% !important;
-    }
+  .header-content {
+    padding: 0.75rem !important;
+  }
+
+  /* Hide DolarPill on very small screens to prevent overflow */
+  .dolar-pill {
+    display: none !important;
+  }
 }
 
 /* Simplified Brand Gradient */
