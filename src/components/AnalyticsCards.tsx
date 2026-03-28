@@ -4,7 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   PieChart, Pie, Cell, Legend, Sector 
 } from 'recharts';
-import { TrendingUp, PieChart as PieIcon, DollarSign } from 'lucide-react';
+import { DollarSign } from 'lucide-react';
 
 interface Transaction {
   uuid: string;
@@ -115,23 +115,20 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
   };
 
   return (
-    <div className="analytics-container animate-in stagger-3" style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '1.5rem' }}>
+    <div className="analytics-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 'var(--space-group)' }}>
       
-      {/* Deposit Bar Chart (Monthly ARS) */}
-      <div className="glass" style={{ gridColumn: 'span 7', padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+      {/* Deposit Bar Chart (Monthly ARS) - Dominant Card */}
+      <div className="glass" style={{ gridColumn: 'span 8', padding: 'var(--space-item) 2.5rem', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div className="icon-container" style={{ background: 'hsla(var(--primary), 0.1)', color: 'hsl(var(--primary))' }}>
-              <TrendingUp size={20} />
-            </div>
             <div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Depósitos Locales (ARS)</h3>
-              <p style={{ opacity: 0.5, fontSize: '0.8rem' }}>Histórico mensual en pesos</p>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 900 }}>Depósitos Locales</h3>
+              <p style={{ opacity: 0.4, fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Histórico mensual ARS</p>
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase' }}>Total Ref. USD</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'hsl(var(--primary))' }}>${totalInUSD} <span style={{ fontSize: '0.7rem' }}>USD</span></div>
+            <div style={{ fontSize: '0.7rem', opacity: 0.4, fontWeight: 700, textTransform: 'uppercase' }}>Ref. USD</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 900 }}>${totalInUSD}</div>
           </div>
         </div>
         
@@ -169,21 +166,18 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
         </div>
       </div>
 
-      {/* Expense Pie Chart */}
-      <div className="glass" style={{ gridColumn: 'span 5', padding: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+      {/* Expense Pie Chart - Secondary Card */}
+      <div className="glass" style={{ gridColumn: 'span 4', padding: 'var(--space-item) 2.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div className="icon-container" style={{ background: 'hsla(var(--error), 0.1)', color: 'hsl(var(--error))' }}>
-              <PieIcon size={20} />
-            </div>
             <div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Distribución de Gastos</h3>
-              <p style={{ opacity: 0.5, fontSize: '0.8rem' }}>Ranking por consumo</p>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 900 }}>Distribución</h3>
+              <p style={{ opacity: 0.4, fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Ranking por consumo</p>
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '0.7rem', opacity: 0.5, textTransform: 'uppercase' }}>Total USD</div>
-            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'hsl(var(--error))' }}>${totalExpenseUSD}</div>
+            <div style={{ fontSize: '0.7rem', opacity: 0.4, fontWeight: 700, textTransform: 'uppercase' }}>Total USD</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'hsl(var(--error))' }}>${totalExpenseUSD}</div>
           </div>
         </div>
 

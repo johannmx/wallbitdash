@@ -21,45 +21,44 @@ interface RecentExpensesProps {
 
 const RecentExpenses: FC<RecentExpensesProps> = ({ data, arsRate }) => {
   return (
-    <div className="glass animate-in stagger-2" style={{ 
-      marginTop: '2rem', 
-      padding: 'var(--container-padding, 2rem)', 
-      background: 'linear-gradient(135deg, var(--glass-bg) 0%, rgba(59, 130, 246, 0.1) 100%)' 
-    }}>
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h2 style={{ fontSize: '1.8rem', marginBottom: '0.2rem' }} className="gradient-text">{data.title}</h2>
-        <p style={{ opacity: 0.6, fontSize: '0.9rem' }}>{data.subtitle}</p>
+    <div style={{ marginTop: '0', padding: '0' }}>
+      <div style={{ marginBottom: '2.5rem' }}>
+        <h2 style={{ fontSize: '2.25rem', fontWeight: 900, letterSpacing: '-0.03em' }}>Consumos Recientes</h2>
+        <p style={{ opacity: 0.3, fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em' }}>{data.subtitle}</p>
       </div>
 
-      <div className="dashboard-grid">
-        {/* Summary Card */}
+      <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 'var(--space-group)' }}>
+        {/* Summary Card - Reduced width for list dominance */}
         <div className="glass" style={{ 
-          gridColumn: 'span 4',
-          padding: '2rem', 
+          gridColumn: 'span 3',
+          padding: '2.5rem', 
           display: 'flex', 
           flexDirection: 'column', 
           justifyContent: 'center',
           alignItems: 'center',
-          textAlign: 'center'
+          textAlign: 'center',
+          background: 'hsla(var(--error), 0.05)',
+          border: '1px solid hsla(var(--error), 0.1)',
+          borderRadius: '1.25rem'
         }}>
-          <h3 style={{ opacity: 0.5, fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '0.05em' }}>Total Gastado (7 días)</h3>
+          <h3 style={{ opacity: 0.5, fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '0.05em' }}>Total (7 días)</h3>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '1.5rem' }}>
-            <span style={{ fontSize: '3rem', fontWeight: 700 }} className="gradient-text">
+            <span style={{ fontSize: '3rem', fontWeight: 900 }}>
               ${data.totalSpent}
             </span>
-            <span style={{ opacity: 0.6 }}>USD</span>
+            <span style={{ opacity: 0.4, fontWeight: 700 }}>USD</span>
           </div>
 
-          <div style={{ paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', width: '100%' }}>
-            <div style={{ fontSize: '0.75rem', opacity: 0.5, marginBottom: '0.5rem' }}>Equivalente aprox en ARS</div>
-            <div style={{ fontWeight: 800, color: 'hsl(var(--primary))', fontSize: '1.1rem' }}>
-              ${(parseFloat(data.totalSpent) * arsRate).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          <div style={{ paddingTop: '1rem', borderTop: '1px solid hsla(var(--foreground), 0.1)', width: '100%' }}>
+            <div style={{ fontSize: '0.7rem', opacity: 0.4, fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>Aprox. en Pesos</div>
+            <div style={{ fontWeight: 900, fontSize: '1.25rem' }}>
+              ${(parseFloat(data.totalSpent) * arsRate).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
             </div>
           </div>
         </div>
 
-        {/* Mini List */}
-        <div className="modern-scroll" style={{ gridColumn: 'span 8', maxHeight: '250px', overflowY: 'auto', paddingRight: '1rem' }}>
+        {/* Mini List - Expanded dominant width */}
+        <div className="modern-scroll" style={{ gridColumn: 'span 9', maxHeight: '350px', overflowY: 'auto', paddingRight: '2.5rem' }}>
           {data.transactions.length === 0 ? (
             <div style={{ opacity: 0.3, textAlign: 'center', padding: '2rem' }}>No hay gastos en los últimos 7 días.</div>
           ) : (
@@ -84,14 +83,15 @@ const RecentExpenses: FC<RecentExpensesProps> = ({ data, arsRate }) => {
                     {tx.status === 'PENDING' && (
                       <span style={{ 
                         fontSize: '0.6rem', 
-                        padding: '0.15rem 0.4rem', 
+                        padding: '0.2rem 0.5rem', 
                         borderRadius: '0.4rem', 
-                        background: 'hsla(var(--warning), 0.1)', 
+                        background: 'hsla(var(--warning), 0.15)', 
                         color: 'hsl(var(--warning))',
-                        fontWeight: 800,
-                        textTransform: 'uppercase'
+                        fontWeight: 900,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em'
                       }}>
-                        Pendiente
+                        Procesando
                       </span>
                     )}
                   </div>

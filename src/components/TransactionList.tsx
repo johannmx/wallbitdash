@@ -89,33 +89,39 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
   };
 
   return (
-    <div className="glass transaction-list-container animate-in stagger-4" style={{ marginTop: '2rem', padding: isMobile ? '1.25rem' : '2rem', transition: 'all 0.4s ease' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+    <div style={{ marginTop: '0' }}>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: '3rem',
+        flexWrap: 'wrap',
+        gap: '2rem'
+      }}>
         <div>
-          <h2 style={{ fontSize: isMobile ? '1.25rem' : '1.5rem' }}>Historial</h2>
-          <p style={{ opacity: 0.5, fontSize: '0.75rem' }}>{filteredTransactions.length} registros</p>
+          <h2 style={{ fontSize: isMobile ? '1.75rem' : '2.25rem', fontWeight: 900, letterSpacing: '-0.03em' }}> Ledger Histórico</h2>
+          <p style={{ opacity: 0.3, fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em' }}>{filteredTransactions.length} registros totales</p>
         </div>
         
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: isMobile ? '100%' : 'auto' }}>
           <input 
             type="text" 
-            placeholder="Buscar..."
+            placeholder="Search records..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ 
-              background: 'hsla(var(--primary), 0.08)', 
-              border: '2px solid hsl(var(--primary))',
-              padding: '0.65rem 1.5rem',
-              borderRadius: '2rem',
+              background: 'hsla(var(--foreground), 0.05)', 
+              border: '1px solid var(--border)',
+              padding: '0.85rem 1.5rem',
+              borderRadius: '1rem',
               color: 'hsl(var(--foreground))',
               width: '100%',
-              maxWidth: isMobile ? '100%' : '280px',
-              fontSize: '0.9rem',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              maxWidth: isMobile ? '100%' : '320px',
+              fontSize: '0.95rem',
+              transition: 'all 0.2s ease',
               outline: 'none',
-              boxShadow: '0 4px 12px -2px hsla(var(--primary), 0.2)'
             }}
-            className="search-input"
+            className="search-input-new"
           />
         </div>
       </div>
@@ -187,7 +193,7 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
               </tr>
             </thead>
             <tbody>
-              {filteredTransactions.map((tx) => {
+              {filteredTransactions.map((tx, i) => {
                 const expense = isExpense(tx.type);
                 const statusColor = getStatusColor(tx.status);
                 const statusUpper = tx.status.toUpperCase();
@@ -200,47 +206,48 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
                 if (isPending) amountColor = 'hsl(var(--warning))';
                 if (isReversed) amountColor = '#8a89ff';
 
+                const index = i % 10; // Stagger only first few
                 return (
-                  <tr key={tx.uuid} className="tx-row" style={{ 
-                    background: 'hsla(var(--foreground), 0.01)', 
-                    borderRadius: '1rem',
-                    opacity: isFailed ? 0.7 : 1
+                  <tr key={tx.uuid} className={`tx-row animate-in stagger-${index + 1}`} style={{ 
+                    borderBottom: '1px solid hsla(var(--foreground), 0.05)',
+                    opacity: isFailed ? 0.5 : 1,
+                    transition: 'all 0.2s var(--ease-out-expo)'
                   }}>
-                    <td style={{ padding: '1rem', borderTopLeftRadius: '1rem', borderBottomLeftRadius: '1rem', fontSize: '0.8rem', fontWeight: 600, opacity: 0.5 }}>
+                    <td style={{ padding: '1.5rem 1rem', fontSize: '0.8rem', fontWeight: 700, opacity: 0.3, fontFamily: "'JetBrains Mono', monospace" }}>
                       {new Date(tx.date + 'T00:00:00Z').toLocaleDateString('es-ES')}
                     </td>
-                    <td style={{ fontSize: '0.9rem', fontWeight: 700, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: "'Outfit', sans-serif" }}>
+                    <td style={{ fontSize: '1rem', fontWeight: 800, maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: "'Outfit', sans-serif" }}>
                       {tx.description || '-'}
                     </td>
                     <td>
                       <span style={{ 
-                        fontSize: '0.7rem', 
-                        opacity: 0.5, 
+                        fontSize: '0.65rem', 
+                        opacity: 0.4, 
                         background: 'hsla(var(--foreground), 0.05)', 
-                        padding: '0.2rem 0.6rem', 
-                        borderRadius: '0.5rem',
+                        padding: '0.25rem 0.5rem', 
+                        borderRadius: '0.25rem',
                         textTransform: 'uppercase',
-                        fontWeight: 800,
-                        letterSpacing: '0.02em'
+                        fontWeight: 900,
+                        letterSpacing: '0.1em'
                       }}>
-                        {tx.type.replace(/_/g, ' ').toLowerCase()}
+                        {tx.type.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td style={{ fontWeight: 700, color: amountColor, fontSize: '0.9rem' }}>
-                      {expense ? '-' : '+'}${tx.amount} <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>{tx.currency}</span>
+                    <td style={{ fontWeight: 800, color: amountColor, fontSize: '1.1rem', fontFamily: "'JetBrains Mono', monospace" }}>
+                      {expense ? '-' : '+'}${tx.amount} <span style={{ fontSize: '0.7rem', opacity: 0.3 }}>{tx.currency}</span>
                     </td>
-                    <td style={{ borderTopRightRadius: '1rem', borderBottomRightRadius: '1rem' }}>
+                    <td style={{ textAlign: 'right', paddingRight: '1rem' }}>
                       <span style={{ 
                         fontSize: '0.65rem', 
-                        padding: '0.3rem 0.75rem', 
-                        borderRadius: '2rem',
-                        background: 'transparent',
-                        color: statusColor,
-                        border: `2px solid ${statusColor}`,
-                        fontWeight: 800,
+                        padding: '0.4rem 0.85rem', 
+                        borderRadius: '0.25rem',
+                        background: statusColor,
+                        color: 'black',
+                        fontWeight: 900,
                         textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
                         display: 'inline-block',
-                        minWidth: '75px',
+                        minWidth: '90px',
                         textAlign: 'center'
                       }}>
                         {tx.status}

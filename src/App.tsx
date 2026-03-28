@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sun, Moon, Monitor, Wallet, Eye, EyeOff } from 'lucide-react';
+import { Sun, Moon, Wallet, Eye, EyeOff } from 'lucide-react';
 import BalanceCards from './components/BalanceCards';
 import TransactionList from './components/TransactionList';
 import RecentExpenses from './components/RecentExpenses';
@@ -181,84 +181,82 @@ function App() {
   }
 
   return (
-    <main className="animate-in" style={{ padding: 'max(1.5rem, 3vw)', maxWidth: '1440px', margin: '0 auto' }}>
-      <header className="header-content" style={{ marginBottom: '4rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem' }}>
-        <div style={{ flex: '1 1 auto', minWidth: '240px' }}>
-          <h1 style={{ fontSize: 'clamp(2rem, 6vw, 3rem)', marginBottom: '0.5rem', fontWeight: 900 }}>
-            Hola, <span className="gradient-text">Johann</span>
-          </h1>
-          <p style={{ opacity: 0.5, fontSize: '1rem', fontWeight: 500 }}>wallbit personal dashboard</p>
+    <main className="animate-in" style={{ padding: 'max(1.5rem, 4vw)', maxWidth: '1440px', margin: '0 auto' }}>
+      <header className="header-content stagger-1" style={{ marginBottom: 'var(--space-section)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem' }}>
+        <div style={{ flex: '1 1 auto', minWidth: '240px', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div className="glass" style={{ 
+            width: '64px', 
+            height: '64px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            color: 'hsl(var(--primary))',
+            flexShrink: 0,
+            borderRadius: '1.25rem',
+            border: '2px solid hsla(var(--primary), 0.2)',
+            boxShadow: '0 0 30px -5px hsla(var(--primary), 0.3)'
+          }}>
+            <Wallet size={36} strokeWidth={2.5} />
+          </div>
+          <div>
+            <h1 style={{ fontSize: 'clamp(2rem, 6vw, 3.5rem)', margin: 0, fontWeight: 900, lineHeight: 1, letterSpacing: '-0.04em' }}>
+              Hola, <span className="gradient-text">Johann</span>
+            </h1>
+            <p style={{ opacity: 0.3, fontSize: '0.8rem', fontWeight: 800, marginTop: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>wallbit personal dashboard</p>
+          </div>
         </div>
         
-        <div className="header-actions" style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          {/* Balance Visibility Toggle */}
-          <div className="glass" style={{ display: 'flex', padding: '0.3rem', borderRadius: '1rem' }}>
+        <div className="glass header-actions" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', padding: '0.5rem', borderRadius: '1.25rem' }}>
+          {/* Action Group */}
+          <div style={{ display: 'flex', gap: '0.25rem', paddingRight: '0.75rem', borderRight: '1px solid var(--border)' }}>
             <button 
               onClick={() => setShowBalances(!showBalances)}
               className="theme-btn"
               style={{ 
-                opacity: showBalances ? 0.5 : 1,
+                opacity: showBalances ? 0.4 : 1,
                 background: showBalances ? 'transparent' : 'hsl(var(--primary))',
                 color: showBalances ? 'inherit' : 'white',
-                boxShadow: showBalances ? 'none' : '0 4px 15px -3px hsla(var(--primary), 0.5)'
               }}
               title={showBalances ? "Ocultar saldos" : "Mostrar saldos"}
             >
-              {showBalances ? <Eye size={18} /> : <EyeOff size={18} />}
+              {showBalances ? <Eye size={16} /> : <EyeOff size={16} />}
+            </button>
+            
+            <button 
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="theme-btn"
+              title="Cambiar tema"
+            >
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
             </button>
           </div>
 
-          {/* Theme Toggle */}
-          <div className="glass" style={{ display: 'flex', padding: '0.3rem', borderRadius: '1rem', gap: '0.3rem' }}>
-            <button 
-              onClick={() => setTheme('light')}
-              className={`theme-btn ${theme === 'light' ? 'active' : ''}`}
-            >
-              <Sun size={18} />
-            </button>
-            <button 
-              onClick={() => setTheme('system')}
-              className={`theme-btn ${theme === 'system' ? 'active' : ''}`}
-            >
-              <Monitor size={18} />
-            </button>
-            <button 
-              onClick={() => setTheme('dark')}
-              className={`theme-btn ${theme === 'dark' ? 'active' : ''}`}
-            >
-              <Moon size={18} />
-            </button>
-          </div>
-
-          <RefreshTimer onRefresh={handleRefresh} />
-          <DolarPill />
-          
-          <div className="glass logo-container" style={{ 
-            width: '56px', 
-            height: '56px', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            overflow: 'hidden',
-            color: 'hsl(var(--primary))',
-            flexShrink: 0
-          }}>
-            <Wallet size={32} strokeWidth={2.5} />
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <RefreshTimer onRefresh={handleRefresh} />
+            <DolarPill />
           </div>
         </div>
       </header>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-        <BalanceCards checking={data.checking} stocks={data.stocks} showBalances={showBalances} arsRate={data.arsRate || 1000} />
-        <RecentExpenses data={data.recentExpenses} arsRate={data.arsRate || 1000} />
-        <AnalyticsCards transactions={data.transactions} arsRate={data.arsRate || 1000} />
-        <TransactionList transactions={data.transactions} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+        <div className="stagger-2" style={{ marginBottom: 'var(--space-section)' }}>
+          <BalanceCards checking={data.checking} stocks={data.stocks} showBalances={showBalances} arsRate={data.arsRate || 1000} />
+        </div>
+        <div className="stagger-3" style={{ marginBottom: 'var(--space-section)' }}>
+          <RecentExpenses data={data.recentExpenses} arsRate={data.arsRate || 1000} />
+        </div>
+        <div className="stagger-4" style={{ marginBottom: 'var(--space-section)' }}>
+          <AnalyticsCards transactions={data.transactions} arsRate={data.arsRate || 1000} />
+        </div>
+        <div className="stagger-5">
+          <TransactionList transactions={data.transactions} />
+        </div>
       </div>
 
-      <footer style={{ marginTop: '6rem', opacity: 0.3, textAlign: 'center', fontSize: '0.85rem', paddingBottom: '3rem' }}>
-        <p>Wallbit Dashboard v2.0 • Designed with Persistence ✨</p>
+      <footer style={{ marginTop: '6rem', opacity: 0.2, textAlign: 'center', fontSize: '0.75rem', paddingBottom: '3rem' }}>
+        <p>Wallbit Dashboard • {new Date().getFullYear()}</p>
         {data._cacheInfo && (
-          <p style={{ fontSize: '0.75rem', marginTop: '0.5rem' }}>Última sincronización: {new Date(data._cacheInfo.lastUpdated).toLocaleTimeString()}</p>
+          <p style={{ marginTop: '0.25rem' }}>Full Sync: {new Date(data._cacheInfo.lastUpdated).toLocaleTimeString()}</p>
         )}
       </footer>
 
