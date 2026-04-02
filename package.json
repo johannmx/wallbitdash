@@ -22,7 +22,7 @@
     "recharts": "^3.8.1",
     "lucide-react": "^1.7.0",
     "helmet": "^8.0.0",
-    "express-rate-limit": "^7.5.0"
+    "express-rate-limit": "^8.3.2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
