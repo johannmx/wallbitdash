@@ -191,6 +191,7 @@ const fetchWallbitData = async () => {
         currency: (tx.source_currency?.code || tx.currency || 'USD'),
         status: tx.status,
         date: (tx.created_at || tx.date).split('T')[0],
+        timestamp: new Date(tx.created_at || tx.date).getTime(),
         description: desc
       };
     });
@@ -202,11 +203,11 @@ const fetchWallbitData = async () => {
 
     const expenseTypes = ['card_spent', 'pay_qr', 'internal_transfer', 'wire_transfer_out', 'withdrawal', 'withdrawal_local'];
     
+    const sevenDaysAgoTime = sevenDaysAgo.getTime();
     const recentExpenses = mappedTxs.filter(tx => {
-       const d = new Date(tx.date);
        const isExpense = expenseTypes.includes(tx.type.toLowerCase()) || tx.type.toLowerCase().includes('spent');
-       return d >= sevenDaysAgo && isExpense && (tx.status === 'COMPLETED' || tx.status === 'PENDING');
-    }).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+       return tx.timestamp >= sevenDaysAgoTime && isExpense && (tx.status === 'COMPLETED' || tx.status === 'PENDING');
+    }).sort((a,b) => b.timestamp - a.timestamp);
 
     const totalInUSD = recentExpenses.reduce((sum, tx) => {
       let val = parseFloat(tx.amount);
