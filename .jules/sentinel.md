@@ -7,3 +7,8 @@
 **Vulnerability:** The backend allowed public access if the `DASHBOARD_TOKEN` environment variable was missing, due to a middleware that called `next()` instead of returning an error when the token was not configured.
 **Learning:** Security-critical configuration must be strictly enforced. A missing secret should never lead to a "fail-open" state. Implementing immediate process termination at startup and mandatory error responses in middleware ensures a "fail-closed" security posture.
 **Prevention:** Implement top-level checks for mandatory security environment variables and exit the process if they are missing. In middleware, ensure that absence of configuration results in an access denial, not a bypass.
+
+## 2026-04-09 - [Missing Client IP Forwarding in Nginx]
+**Vulnerability:** Missing client IP forwarding headers in the Nginx configuration.
+**Learning:** In a reverse proxy setup, the backend receives the proxy's IP address instead of the client's. This renders security measures like rate limiting and IP-based auditing ineffective, as all traffic appears to originate from the same source.
+**Prevention:** Always include `proxy_set_header X-Real-IP $remote_addr;` and `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;` in Nginx proxy configurations to ensure the backend can correctly identify and rate-limit individual clients.
