@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { RecentExpensesData } from '../types/dashboard';
+import type { RecentExpensesData } from '../types/dashboard';
 
 interface RecentExpensesProps {
   data: RecentExpensesData;
