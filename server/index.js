@@ -34,6 +34,12 @@ const API_KEY = process.env.WALLBIT_API_KEY;
 const API_BASE = 'https://api.wallbit.io/api/public/v1';
 const DASHBOARD_TOKEN = process.env.DASHBOARD_TOKEN;
 
+if (!DASHBOARD_TOKEN) {
+  console.error('CRITICAL ERROR: DASHBOARD_TOKEN environment variable is not set!');
+  console.error('The application will now exit to prevent unauthenticated access.');
+  process.exit(1);
+}
+
 // Security Middlewares
 app.use(helmet());
 
@@ -52,8 +58,8 @@ app.use(express.json());
 // Auth Middleware
 const authMiddleware = (req, res, next) => {
   if (!DASHBOARD_TOKEN) {
-    console.warn('⚠️ No DASHBOARD_TOKEN set. Backend is publicly accessible.');
-    return next();
+    console.error('❌ DASHBOARD_TOKEN is not configured. Access denied.');
+    return res.status(500).json({ error: 'Internal Server Error: Security misconfiguration' });
   }
   const token = req.headers['x-dashboard-token'];
   if (!token || typeof token !== 'string') {
