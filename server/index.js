@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import crypto from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -54,7 +55,22 @@ const authMiddleware = (req, res, next) => {
     return next();
   }
   const token = req.headers['x-dashboard-token'];
-  if (token === DASHBOARD_TOKEN) return next();
+  if (!token || typeof token !== 'string') {
+    return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+  }
+
+  // Prevent timing attacks by using constant-time comparison
+  // Hashing first ensures equal lengths before comparison
+  try {
+    const expectedHash = crypto.createHash('sha256').update(String(DASHBOARD_TOKEN)).digest();
+    const tokenHash = crypto.createHash('sha256').update(token).digest();
+
+    if (crypto.timingSafeEqual(expectedHash, tokenHash)) {
+      return next();
+    }
+  } catch (error) {
+    console.error('Auth verification error:', error);
+  }
   return res.status(401).json({ error: 'Unauthorized: Invalid token' });
 };
 
