@@ -9,10 +9,10 @@ import RefreshTimer from './components/RefreshTimer';
 import { wallbitData } from './data/mockData';
 
 const API_URL = '/api/dashboard';
-const BUILD_TOKEN = import.meta.env.DASHBOARD_TOKEN || '';
 
 const getHeaders = () => {
-  const token = localStorage.getItem('dashboard_token') || BUILD_TOKEN;
+  // Prevent relying on build-time env vars for backend secrets
+  const token = localStorage.getItem('dashboard_token') || '';
   return {
     'Content-Type': 'application/json',
     ...(token ? { 'X-Dashboard-Token': token } : {})
