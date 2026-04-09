@@ -5,15 +5,7 @@ import {
   PieChart, Pie, Cell, Legend, Sector 
 } from 'recharts';
 import { DollarSign } from 'lucide-react';
-
-interface Transaction {
-  uuid: string;
-  type: string;
-  amount: string;
-  currency: string;
-  status: string;
-  date: string;
-}
+import { Transaction } from '../types/dashboard';
 
 interface AnalyticsCardsProps {
   transactions: Transaction[];
