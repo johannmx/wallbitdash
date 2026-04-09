@@ -7,7 +7,7 @@ import AnalyticsCards from './components/AnalyticsCards';
 import RefreshTimer from './components/RefreshTimer';
 
 import { wallbitData } from './data/mockData';
-import { DashboardData } from './types/dashboard';
+import type { DashboardData } from './types/dashboard';
 
 const API_URL = '/api/dashboard';
 
