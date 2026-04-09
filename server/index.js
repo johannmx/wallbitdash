@@ -3,6 +3,7 @@ import cors from 'cors';
 import cron from 'node-cron';
 import fs from 'fs';
 import path from 'path';
+import { saveToPersistence as saveToPersistenceLib } from './persistence.js';
 import { fileURLToPath } from 'url';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -97,13 +98,9 @@ if (fs.existsSync(DATA_PATH)) {
 }
 
 const saveToPersistence = () => {
-  try {
-    fs.writeFileSync(DATA_PATH, JSON.stringify(cache, null, 2));
+  saveToPersistenceLib(fs, DATA_PATH, cache, () => {
     persistenceExists = true;
-    console.log('💾 Data persisted to disk.');
-  } catch (e) {
-    console.error('❌ Persistence error:', e.message);
-  }
+  });
 };
 
 // --- Wallbit API Helpers ---
