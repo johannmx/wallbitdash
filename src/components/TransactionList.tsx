@@ -1,15 +1,6 @@
 import { type FC, useState, useMemo, useEffect } from 'react';
 import { Search } from 'lucide-react';
-
-type Transaction = {
-  uuid: string;
-  type: string;
-  amount: string;
-  currency: string;
-  status: string;
-  date: string;
-  description?: string;
-};
+import { Transaction } from '../types/dashboard';
 
 interface TransactionListProps {
   transactions: Transaction[];

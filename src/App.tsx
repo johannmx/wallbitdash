@@ -7,6 +7,7 @@ import AnalyticsCards from './components/AnalyticsCards';
 import RefreshTimer from './components/RefreshTimer';
 
 import { wallbitData } from './data/mockData';
+import { DashboardData } from './types/dashboard';
 
 const API_URL = '/api/dashboard';
 
@@ -19,25 +20,10 @@ const getHeaders = () => {
   };
 };
 
-interface DashboardData {
-  checking: { balance: string; currency: string };
-  stocks: { balance: string; currency: string; assets: any[] };
-  recentExpenses: {
-    title: string;
-    subtitle: string;
-    totalSpent: string;
-    currency: string;
-    transactions: any[];
-  };
-  transactions: any[];
-  arsRate?: number;
-  _cacheInfo?: { lastUpdated: string };
-}
-
 type Theme = 'light' | 'dark' | 'system';
 
 const initialState: DashboardData = {
-  ...wallbitData as any,
+  ...wallbitData,
   recentExpenses: {
     title: "Gastos últimos 7 días",
     subtitle: "Consumo total (USD)",

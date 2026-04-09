@@ -1,21 +1,8 @@
 import type { FC } from 'react';
-
-interface Expense {
-  date: string;
-  description: string;
-  amount: string;
-  currency: string;
-  status: string;
-}
+import { RecentExpensesData } from '../types/dashboard';
 
 interface RecentExpensesProps {
-  data: {
-    title: string;
-    subtitle: string;
-    totalSpent: string;
-    currency: string;
-    transactions: Expense[];
-  };
+  data: RecentExpensesData;
   arsRate: number;
 }
 
