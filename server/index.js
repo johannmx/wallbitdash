@@ -4,6 +4,7 @@ import cron from 'node-cron';
 import fs from 'fs';
 import path from 'path';
 import { saveToPersistence as saveToPersistenceLib } from './persistence.js';
+import { fetchDolarRate } from './dolar.js';
 import { fileURLToPath } from 'url';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -137,17 +138,6 @@ const fetchAllTransactions = async (headers) => {
   }
 
   return allTransactions;
-};
-
-const fetchDolarRate = async () => {
-  try {
-    const res = await fetch('https://dolarapi.com/v1/dolares/oficial');
-    if (res.ok) {
-      const data = await res.json();
-      return data.venta;
-    }
-  } catch (e) {}
-  return 1000;
 };
 
 const fetchWallbitData = async () => {
