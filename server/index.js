@@ -44,12 +44,16 @@ if (!DASHBOARD_TOKEN) {
 // Security Middlewares
 app.use(helmet());
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173'];
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
+    console.warn(`🔒 CORS blocked request from unauthorized origin: ${origin}`);
     return callback(new Error('CORS blocked'), false);
   }
 }));

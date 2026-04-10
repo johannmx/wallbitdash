@@ -12,3 +12,8 @@
 **Vulnerability:** Missing client IP forwarding headers in the Nginx configuration.
 **Learning:** In a reverse proxy setup, the backend receives the proxy's IP address instead of the client's. This renders security measures like rate limiting and IP-based auditing ineffective, as all traffic appears to originate from the same source.
 **Prevention:** Always include `proxy_set_header X-Real-IP $remote_addr;` and `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;` in Nginx proxy configurations to ensure the backend can correctly identify and rate-limit individual clients.
+
+## 2026-04-10 - [Preventing Fail-Open CORS Configurations]
+**Vulnerability:** The CORS configuration used a "fail-open" approach (`allowedOrigins.length === 0`) which allowed all origins to access the backend if the `ALLOWED_ORIGINS` environment variable was not set.
+**Learning:** This is a recurring pattern of "fail-open" configurations where a missing setting leads to wide-open access, neutralizing the security control entirely.
+**Prevention:** Implement "fail-closed" defaults for all security controls. If an environment variable is expected but missing, either deny access (like CORS blocking unknown origins and defaulting only to safe local environments) or refuse to start the service entirely.
