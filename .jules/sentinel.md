@@ -17,3 +17,8 @@
 **Vulnerability:** The CORS configuration used a "fail-open" approach (`allowedOrigins.length === 0`) which allowed all origins to access the backend if the `ALLOWED_ORIGINS` environment variable was not set.
 **Learning:** This is a recurring pattern of "fail-open" configurations where a missing setting leads to wide-open access, neutralizing the security control entirely.
 **Prevention:** Implement "fail-closed" defaults for all security controls. If an environment variable is expected but missing, either deny access (like CORS blocking unknown origins and defaulting only to safe local environments) or refuse to start the service entirely.
+
+## 2026-04-11 - [Preventing Hash-based DoS & Enhancing Auth Audit]
+**Vulnerability:** The authentication middleware was hashing the incoming `x-dashboard-token` header without enforcing a maximum length, potentially exposing the server to CPU-exhaustion Denial of Service (DoS) attacks if an attacker sent extremely large payloads. Additionally, failed authentication attempts lacked audit logging, making brute-force or probing attempts harder to detect.
+**Learning:** Cryptographic functions like `crypto.createHash` are computationally expensive. Processing unbound user input with these functions is a common vector for DoS. Furthermore, robust authentication systems must log failures (including origin IP) for incident response and monitoring.
+**Prevention:** Implement strict length validation on all inputs before passing them to cryptographic functions (e.g., `token.length > 256`). Always add structured audit logging (e.g., `console.warn`) containing contextual information like `req.ip` for security-critical failures.
