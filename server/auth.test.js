@@ -10,6 +10,12 @@ const testAuth = (envToken, headerToken) => {
     }
     const token = req.headers['x-dashboard-token'];
     if (!token || typeof token !== 'string') {
+      console.warn(`🔒 Audit: Failed authentication attempt (No token) from IP: ${req.ip || 'Unknown'}`);
+      return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+    }
+
+    if (token.length > 256) {
+      console.warn(`🔒 Audit: Failed authentication attempt (Token too long) from IP: ${req.ip || 'Unknown'}`);
       return res.status(401).json({ error: 'Unauthorized: Invalid token' });
     }
 
@@ -23,10 +29,15 @@ const testAuth = (envToken, headerToken) => {
     } catch (error) {
       console.error('Auth verification error:', error);
     }
+
+    console.warn(`🔒 Audit: Failed authentication attempt (Invalid token) from IP: ${req.ip || 'Unknown'}`);
     return res.status(401).json({ error: 'Unauthorized: Invalid token' });
   };
 
-  const req = { headers: headerToken ? { 'x-dashboard-token': headerToken } : {} };
+  const req = {
+    headers: headerToken ? { 'x-dashboard-token': headerToken } : {},
+    ip: '127.0.0.1'
+  };
   let responseStatus = null;
   let responseBody = null;
   const res = {
@@ -60,6 +71,14 @@ console.log('Test 3: Token set, correct header');
 const result3 = testAuth('secret', 'secret');
 if (!result3.nextCalled) {
   console.error('Test 3 Failed');
+  process.exit(1);
+}
+
+console.log('Test 4: Token too long');
+const longToken = 'a'.repeat(300);
+const result4 = testAuth('secret', longToken);
+if (result4.nextCalled || result4.responseStatus !== 401) {
+  console.error('Test 4 Failed');
   process.exit(1);
 }
 

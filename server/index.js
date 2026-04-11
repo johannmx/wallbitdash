@@ -67,7 +67,15 @@ const authMiddleware = (req, res, next) => {
     return res.status(500).json({ error: 'Internal Server Error: Security misconfiguration' });
   }
   const token = req.headers['x-dashboard-token'];
+
+  // Security Enhancement: Input validation & length limit to prevent DoS via large payload hashing
   if (!token || typeof token !== 'string') {
+    console.warn(`🔒 Audit: Failed authentication attempt (No token) from IP: ${req.ip || 'Unknown'}`);
+    return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+  }
+
+  if (token.length > 256) {
+    console.warn(`🔒 Audit: Failed authentication attempt (Token too long) from IP: ${req.ip || 'Unknown'}`);
     return res.status(401).json({ error: 'Unauthorized: Invalid token' });
   }
 
@@ -83,6 +91,8 @@ const authMiddleware = (req, res, next) => {
   } catch (error) {
     console.error('Auth verification error:', error);
   }
+
+  console.warn(`🔒 Audit: Failed authentication attempt (Invalid token) from IP: ${req.ip || 'Unknown'}`);
   return res.status(401).json({ error: 'Unauthorized: Invalid token' });
 };
 
