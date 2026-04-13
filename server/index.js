@@ -126,13 +126,21 @@ const saveToPersistence = () => {
 
 // --- Wallbit API Helpers ---
 
+const fetchWithTimeout = async (url, options = {}) => {
+  const { timeout = 10000, ...fetchOptions } = options;
+  return fetch(url, {
+    ...fetchOptions,
+    signal: AbortSignal.timeout(timeout)
+  });
+};
+
 const fetchAllTransactions = async (headers) => {
   let allTransactions = [];
   let page = 1;
   let hasMore = true;
 
   while (hasMore) {
-    const res = await fetch(`${API_BASE}/transactions?page=${page}`, { headers });
+    const res = await fetchWithTimeout(`${API_BASE}/transactions?page=${page}`, { headers, timeout: 15000 });
     if (!res.ok) break;
 
     const json = await res.json();
@@ -164,7 +172,7 @@ const fetchWallbitData = async () => {
     const arsRate = await fetchDolarRate();
 
     // 1. Fetch Checking Balance
-    const checkingRes = await fetch(`${API_BASE}/balance/checking`, { headers });
+    const checkingRes = await fetchWithTimeout(`${API_BASE}/balance/checking`, { headers });
     if (checkingRes.ok) {
       const json = await checkingRes.json();
       const item = (json.data && json.data[0]) || { balance: "0.00", currency: "USD" };
@@ -172,7 +180,7 @@ const fetchWallbitData = async () => {
     }
 
     // 2. Fetch Stocks Balance
-    const stocksRes = await fetch(`${API_BASE}/balance/stocks`, { headers });
+    const stocksRes = await fetchWithTimeout(`${API_BASE}/balance/stocks`, { headers });
     if (stocksRes.ok) {
       const json = await stocksRes.json();
       const item = (json.data && json.data[0]) || { shares: "0.00", symbol: "USD" };
