@@ -22,3 +22,8 @@
 **Vulnerability:** The authentication middleware was hashing the incoming `x-dashboard-token` header without enforcing a maximum length, potentially exposing the server to CPU-exhaustion Denial of Service (DoS) attacks if an attacker sent extremely large payloads. Additionally, failed authentication attempts lacked audit logging, making brute-force or probing attempts harder to detect.
 **Learning:** Cryptographic functions like `crypto.createHash` are computationally expensive. Processing unbound user input with these functions is a common vector for DoS. Furthermore, robust authentication systems must log failures (including origin IP) for incident response and monitoring.
 **Prevention:** Implement strict length validation on all inputs before passing them to cryptographic functions (e.g., `token.length > 256`). Always add structured audit logging (e.g., `console.warn`) containing contextual information like `req.ip` for security-critical failures.
+
+## 2026-04-14 - [Preventing Express Error Stack Trace Leaks]
+**Vulnerability:** The Express framework by default leaks full stack traces in HTML responses when uncaught errors occur, especially during CORS rejections (e.g., calling `callback(new Error('CORS blocked'))`).
+**Learning:** Returning raw framework errors directly to the client exposes internal application details and potentially sensitive stack traces. A generic, properly structured JSON response protects application internals.
+**Prevention:** Implement a global error-handling middleware (`app.use((err, req, res, next) => { ... })`) at the end of the routing definitions. This acts as a catch-all to log the error server-side and return generic, secure HTTP status codes and JSON payloads to the client.

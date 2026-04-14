@@ -274,6 +274,19 @@ app.get('/api/dashboard', dashboardLimiter, authMiddleware, (req, res) => {
   });
 });
 
+// Security Enhancement: Global error handler to prevent stack trace leaks
+// Ensures errors return secure JSON responses instead of exposing internals via HTML
+app.use((err, req, res, next) => {
+  console.error('🚨 Error caught by global handler:', err.message);
+
+  if (err.message === 'CORS blocked') {
+    return res.status(403).json({ error: 'Forbidden: CORS policy violation' });
+  }
+
+  // Fail securely: Never leak stack traces to the client
+  res.status(500).json({ error: 'Internal Server Error' });
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Cache Server running at http://0.0.0.0:${PORT}`);
 });
