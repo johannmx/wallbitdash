@@ -27,3 +27,8 @@
 **Vulnerability:** The Express framework by default leaks full stack traces in HTML responses when uncaught errors occur, especially during CORS rejections (e.g., calling `callback(new Error('CORS blocked'))`).
 **Learning:** Returning raw framework errors directly to the client exposes internal application details and potentially sensitive stack traces. A generic, properly structured JSON response protects application internals.
 **Prevention:** Implement a global error-handling middleware (`app.use((err, req, res, next) => { ... })`) at the end of the routing definitions. This acts as a catch-all to log the error server-side and return generic, secure HTTP status codes and JSON payloads to the client.
+
+## 2026-04-16 - [Preventing Cache Data Leakage of Sensitive Information]
+**Vulnerability:** The `/api/dashboard` endpoint, which returns sensitive financial transaction and balance data, did not include headers to prevent client-side or intermediary caching.
+**Learning:** Browsers and proxy servers can aggressively cache API responses. If an authenticated user views sensitive financial data on a shared or compromised device, this data could persist in the browser's cache or a proxy's memory long after the session has ended, leading to potential data leakage.
+**Prevention:** Always apply strict anti-caching headers (`Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate`, `Pragma: no-cache`, `Expires: 0`, `Surrogate-Control: no-store`) to any API endpoints returning sensitive financial, PII, or auth-related data.
