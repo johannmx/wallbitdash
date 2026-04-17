@@ -13,7 +13,8 @@ const API_URL = '/api/dashboard';
 
 const getHeaders = () => {
   // Prevent relying on build-time env vars for backend secrets
-  const token = localStorage.getItem('dashboard_token') || '';
+  // 🛡️ Sentinel: Use sessionStorage for sensitive auth tokens so they are cleared when the browser session ends
+  const token = sessionStorage.getItem('dashboard_token') || '';
   return {
     'Content-Type': 'application/json',
     ...(token ? { 'X-Dashboard-Token': token } : {})
@@ -82,7 +83,8 @@ function App() {
 
   const handleSaveToken = () => {
     if (tokenInput.trim()) {
-      localStorage.setItem('dashboard_token', tokenInput.trim());
+      // 🛡️ Sentinel: Store sensitive token in sessionStorage instead of localStorage
+      sessionStorage.setItem('dashboard_token', tokenInput.trim());
       setIsLocked(false);
       fetchDashboard();
     }
