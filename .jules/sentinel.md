@@ -32,3 +32,8 @@
 **Vulnerability:** The `/api/dashboard` endpoint, which returns sensitive financial transaction and balance data, did not include headers to prevent client-side or intermediary caching.
 **Learning:** Browsers and proxy servers can aggressively cache API responses. If an authenticated user views sensitive financial data on a shared or compromised device, this data could persist in the browser's cache or a proxy's memory long after the session has ended, leading to potential data leakage.
 **Prevention:** Always apply strict anti-caching headers (`Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate`, `Pragma: no-cache`, `Expires: 0`, `Surrogate-Control: no-store`) to any API endpoints returning sensitive financial, PII, or auth-related data.
+
+## 2026-04-17 - [Secure Token Storage in Frontend]
+**Vulnerability:** The application was storing the sensitive `dashboard_token` in `localStorage`. This allowed the token to persist indefinitely across browser sessions, increasing the risk of unauthorized access if the device was shared or compromised.
+**Learning:** `localStorage` provides long-term persistence, which is suitable for non-sensitive preferences (like UI theme) but inappropriate for authentication tokens. `sessionStorage` provides an automatic mechanism to clear sensitive data when the browsing session ends (i.e., tab or browser closure).
+**Prevention:** Store sensitive authentication tokens exclusively in `sessionStorage` or HTTP-only cookies to minimize their lifespan and exposure window on the client side. Reserve `localStorage` solely for non-sensitive, user-preference data.
