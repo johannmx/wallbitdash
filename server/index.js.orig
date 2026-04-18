@@ -193,16 +193,16 @@ const fetchWallbitData = async () => {
     if (stocksRes.ok) {
       const json = await stocksRes.json();
       const item = (json.data && json.data[0]) || { shares: "0.00", symbol: "USD" };
-      cache.stocks = { 
-        balance: item.shares || item.balance || "0.00", 
+      cache.stocks = {
+        balance: item.shares || item.balance || "0.00",
         currency: item.symbol || item.currency || "USD",
-        assets: json.data || [] 
+        assets: json.data || []
       };
     }
 
     // 3. Fetch ALL Transactions
     const txsRaw = await fetchAllTransactions(headers);
-    
+
     // 4. Map Transactions
     const mappedTxs = txsRaw.map(tx => {
       let desc = (tx.external_address || tx.comment || tx.description || '').trim();
@@ -229,7 +229,7 @@ const fetchWallbitData = async () => {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     const expenseTypes = ['card_spent', 'pay_qr', 'internal_transfer', 'wire_transfer_out', 'withdrawal', 'withdrawal_local'];
-    
+
     const sevenDaysAgoTime = sevenDaysAgo.getTime();
     const recentExpenses = mappedTxs.filter(tx => {
        const isExpense = expenseTypes.includes(tx.type.toLowerCase()) || tx.type.toLowerCase().includes('spent');
@@ -287,12 +287,6 @@ app.get('/api/dashboard', dashboardLimiter, authMiddleware, (req, res) => {
       persistent: persistenceExists
     }
   });
-});
-
-// Security Enhancement: Catch-all 404 handler to prevent Express from leaking framework details via default HTML responses
-app.use((req, res) => {
-  console.warn(`🔒 Audit: 404 Not Found on ${req.method} ${req.originalUrl} from IP: ${req.ip || 'Unknown'}`);
-  res.status(404).json({ error: 'Not Found' });
 });
 
 // Security Enhancement: Global error handler to prevent stack trace leaks

@@ -37,3 +37,8 @@
 **Vulnerability:** The application was storing the sensitive `dashboard_token` in `localStorage`. This allowed the token to persist indefinitely across browser sessions, increasing the risk of unauthorized access if the device was shared or compromised.
 **Learning:** `localStorage` provides long-term persistence, which is suitable for non-sensitive preferences (like UI theme) but inappropriate for authentication tokens. `sessionStorage` provides an automatic mechanism to clear sensitive data when the browsing session ends (i.e., tab or browser closure).
 **Prevention:** Store sensitive authentication tokens exclusively in `sessionStorage` or HTTP-only cookies to minimize their lifespan and exposure window on the client side. Reserve `localStorage` solely for non-sensitive, user-preference data.
+
+## 2026-04-18 - [Preventing Express Error HTML Info Leaks & Malformed JSON Crash]
+**Vulnerability:** Express by default leaks routing paths via HTML 404 pages (e.g. `Cannot GET /route`) and throws internal HTML/text stack trace errors when `express.json()` encounters a malformed JSON payload.
+**Learning:** Returning default HTML pages for non-existent routes or payload parsing errors exposes framework behaviors and internal stack details to an attacker/scanner, making recon easier. Explicitly catching SyntaxErrors from the JSON body parser and globally handling 404s ensures APIs only ever return consistent, secure JSON boundaries.
+**Prevention:** Always implement a custom 404 handler (`app.use((req, res) => { res.status(404)... })`) before the global error handler, and inject a targeted middleware immediately after `express.json()` to catch `SyntaxError`s specifically where `err.status === 400` and `'body' in err`.
