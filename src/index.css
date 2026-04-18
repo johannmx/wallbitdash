@@ -184,8 +184,12 @@ h1, h2, h3, h4, .brand-font {
 }
 
 @media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem !important;
+  }
   .dashboard-grid > div {
-    grid-column: span 12 !important;
+    grid-column: span 1 !important;
   }
 }
 

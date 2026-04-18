@@ -45,7 +45,7 @@ const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, a
         {/* Checking Balance (Hero Focus) */}
         <div className="glass stagger-2" style={{ 
           gridColumn: 'span 12', 
-          padding: 'clamp(2.5rem, 6vw, 4.5rem)',
+          padding: 'clamp(1.5rem, 5vw, 4.5rem)',
           background: 'linear-gradient(145deg, hsla(var(--primary), 0.15), hsla(var(--primary), 0.05))',
           border: '1px solid hsla(var(--primary), 0.3)',
           boxShadow: '0 32px 64px -16px hsla(var(--primary), 0.15)',
@@ -102,7 +102,7 @@ const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, a
         {/* Stocks Balance (Secondary) */}
         <div className="glass stagger-3" style={{ 
           gridColumn: 'span 12', 
-          padding: '2.5rem', 
+          padding: 'clamp(1.5rem, 5vw, 2.5rem)', 
           background: 'hsla(var(--foreground), 0.02)', 
           border: '1px solid var(--border)',
           borderRadius: '1.25rem'
