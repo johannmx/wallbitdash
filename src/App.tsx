@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sun, Moon, Wallet, Eye, EyeOff } from 'lucide-react';
+import { Sun, Moon, Eye, EyeOff } from 'lucide-react';
 import BalanceCards from './components/BalanceCards';
 import TransactionList from './components/TransactionList';
 import RecentExpenses from './components/RecentExpenses';
