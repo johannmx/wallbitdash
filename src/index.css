@@ -20,7 +20,7 @@
   --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.light {
+[data-theme="light"] {
   --background: 0, 0%, 98%;
   --foreground: 220, 20%, 10%;
   --card: 0, 0%, 100%;
@@ -255,4 +255,17 @@ html {
 .bottom-nav-item.active {
   opacity: 1;
   color: hsl(var(--primary));
+}
+
+/* Responsive Nav Visibility */
+@media (max-width: 1023px) {
+  .sidebar {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .bottom-nav {
+    display: none !important;
+  }
 }
