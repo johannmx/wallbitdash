@@ -23,7 +23,7 @@
   --duration-lg: 0.65s;
 
   /* Semantic Layout Scale */
-  --space-section: clamp(6rem, 12vw, 12rem);
+  --space-section: clamp(2rem, 4vw, 3.5rem);
   --space-group: clamp(3rem, 6vw, 5rem);
   --space-item: 1.5rem;
 }
