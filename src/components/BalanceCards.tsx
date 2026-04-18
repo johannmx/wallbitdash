@@ -1,16 +1,39 @@
-import { FC } from 'react';
-import { CountUp } from './CountUp';
-import { TrendingUp, Wallet, PieChart, ArrowDownRight, ArrowUpRight } from 'lucide-react';
+import type { FC } from 'react';
+import { useState, useEffect } from 'react';
+
+const CountUp: FC<{ end: number, duration?: number, showBalances: boolean }> = ({ end, duration = 1500, showBalances }) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!showBalances) {
+      setCount(0);
+      return;
+    }
+
+    let startTimestamp: number | null = null;
+    const initialValue = 0;
+
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      // Ease out expo
+      const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      setCount(easeProgress * (end - initialValue) + initialValue);
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+
+    window.requestAnimationFrame(step);
+  }, [end, duration, showBalances]);
+
+  if (!showBalances) return <>••••••</>;
+  return <>{count.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</>;
+};
 
 interface BalanceCardsProps {
-  checking: {
-    balance: string;
-    currency: string;
-  };
-  stocks: {
-    balance: string;
-    currency: string;
-  };
+  checking: { balance: string; currency: string };
+  stocks: { balance: string; currency: string };
   showBalances: boolean;
   arsRate: number;
 }
@@ -85,89 +108,66 @@ const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, a
           borderRadius: '1.25rem'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div style={{ 
-                width: '32px', 
-                height: '32px', 
-                borderRadius: '8px', 
-                background: 'hsla(var(--primary), 0.1)', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                color: 'hsl(var(--primary))'
-              }}>
-                <PieChart size={18} />
-              </div>
-              <h3 style={{ opacity: 0.5, fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Investment Portfolio</h3>
+            <h3 style={{ opacity: 0.3, fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', margin: 0 }}>Investment Portfolio</h3>
+            <div style={{ color: 'hsl(var(--success))', fontSize: '0.85rem', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span style={{ position: 'relative', top: '1px' }}>↑</span> 12.8%
             </div>
-            <div style={{ fontSize: '0.8rem', fontWeight: 700, opacity: 0.4 }}>STOCKS & ETFS</div>
           </div>
-
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 'clamp(2.5rem, 6vw, 3.5rem)', fontWeight: 800, letterSpacing: '-0.04em' }}>
-              $<CountUp end={parseFloat(stocks.balance)} showBalances={showBalances} />
+            <span style={{ fontSize: '2.5rem', fontWeight: 800 }}>
+              {showBalances ? `$${stocks.balance}` : '••••••'}
             </span>
-            <span style={{ fontSize: '1rem', opacity: 0.2, fontWeight: 700 }}>{stocks.currency}</span>
-          </div>
-
-          <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '0.4rem', 
-              fontSize: '0.8rem', 
-              fontWeight: 700,
-              color: 'hsl(var(--success))',
-              background: 'hsla(var(--success), 0.1)',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '8px'
-            }}>
-              <TrendingUp size={14} />
-              +12.5% TOTAL
+            <span style={{ opacity: 0.2, fontWeight: 700 }}>{stocks.currency}</span>
+            <div className="ars-pill" style={{ marginLeft: 'auto', background: 'transparent', border: 'none', boxShadow: 'none' }}>
+               <span style={{ opacity: 0.3, fontWeight: 800, fontSize: '0.65rem', marginRight: '0.5rem' }}>ARS EQ.</span>
+               <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>{showBalances ? (parseFloat(stocks.balance) * arsRate).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '••••'}</span>
             </div>
-            <div style={{ fontSize: '0.75rem', opacity: 0.3, fontWeight: 600 }}>DIVERSIFIED RISK</div>
           </div>
         </div>
       </div>
-
-      <div className="dashboard-grid" style={{ marginTop: 'var(--space-group)', gap: 'var(--space-group)' }}>
-        {/* Quick Actions / Indicators */}
-        <div className="glass stagger-3 hover-card" style={{ 
-          gridColumn: 'span 12', 
-          padding: '1.5rem', 
-          borderRadius: '1.25rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem'
-        }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'hsla(45, 100%, 50%, 0.1)', color: 'hsl(45, 100%, 50%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <ArrowUpRight size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '0.7rem', fontWeight: 800, opacity: 0.4, textTransform: 'uppercase' }}>Incoming Deposit</div>
-            <div style={{ fontWeight: 700 }}>$1,250.00 <span style={{ opacity: 0.3, fontSize: '0.8rem' }}>PENDING</span></div>
-          </div>
-        </div>
-
-        <div className="glass stagger-3 hover-card" style={{ 
-          gridColumn: 'span 12', 
-          padding: '1.5rem', 
-          borderRadius: '1.25rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem'
-        }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'hsla(var(--primary), 0.1)', color: 'hsl(var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <ArrowDownRight size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '0.7rem', fontWeight: 800, opacity: 0.4, textTransform: 'uppercase' }}>Monthly Yield</div>
-            <div style={{ fontWeight: 700 }}>+$42.31 <span style={{ opacity: 0.3, fontSize: '0.8rem' }}>ESTIMATED</span></div>
-          </div>
-        </div>
-      </div>
+      <style>{`
+        .ars-pill {
+          background: rgba(var(--glass-bg-rgb, 255, 255, 255), 0.05);
+          padding: 0.3rem 0.75rem;
+          border-radius: 2rem;
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: hsl(var(--foreground));
+          border: 1px solid rgba(59, 130, 246, 0.2);
+          margin-left: auto;
+          backdrop-filter: blur(8px);
+          display: flex;
+          gap: 0.3rem;
+          align-items: center;
+          box-shadow: 0 2px 10px -2px rgba(0,0,0,0.1);
+        }
+        .ars-pill span {
+          color: hsl(var(--primary));
+        }
+        .ars-pill-hero {
+          background: hsla(var(--primary), 0.1);
+          padding: 0.6rem 1.25rem;
+          border-radius: 1rem;
+          font-size: 0.85rem;
+          font-weight: 900;
+          color: hsl(var(--foreground));
+          border: 1px solid hsla(var(--primary), 0.2);
+          display: flex;
+          gap: 0.75rem;
+          align-items: center;
+          letter-spacing: 0.05em;
+        }
+        .ars-pill-hero span {
+          color: hsl(var(--primary));
+          font-size: 1.1rem;
+        }
+        @media (max-width: 640px) {
+          .ars-pill { margin-left: 0; margin-top: 0.5rem; width: 100%; justify-content: center; }
+          .ars-pill-hero { width: 100%; justify-content: center; }
+        }
+      `}</style>
     </>
   );
 };
 
-export { BalanceCards };
+export default BalanceCards;
