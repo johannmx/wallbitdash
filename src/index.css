@@ -233,4 +233,43 @@ h1, h2, h3, h4, .brand-font {
   -webkit-text-fill-color: transparent;
 }
 
+/* --- Layout and Navigation Additions --- */
+html {
+  scroll-behavior: smooth;
+}
 
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.scroll-mt {
+  scroll-margin-top: 2rem;
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .app-layout {
+    flex-direction: row;
+    gap: 0;
+  }
+  .bottom-nav {
+    display: none !important;
+  }
+  .scroll-mt {
+    scroll-margin-top: 4rem;
+  }
+}
+
+/* Mobile/Tablet */
+@media (max-width: 1023px) {
+  .app-layout {
+    flex-direction: column;
+  }
+  .sidebar {
+    display: none !important;
+  }
+  .main-content {
+    padding-bottom: 6rem !important; /* Espacio para el bottom nav */
+  }
+}

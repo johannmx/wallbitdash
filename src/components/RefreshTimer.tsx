@@ -57,7 +57,7 @@ const RefreshTimer: FC<RefreshTimerProps> = ({ onRefresh }) => {
     }}>
       {/* Visual Progress Bar Section (Integrated into the capsule) */}
       <div className="timer-progress-section" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.2rem', paddingLeft: '0.75rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.6rem', fontWeight: 800, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem', fontSize: '0.6rem', fontWeight: 800, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
           <span className="sync-label">Sync</span>
           <span className="timer-countdown">{formatTime(timeLeft)}</span>
         </div>

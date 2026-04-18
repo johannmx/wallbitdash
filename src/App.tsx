@@ -5,6 +5,8 @@ import TransactionList from './components/TransactionList';
 import RecentExpenses from './components/RecentExpenses';
 import AnalyticsCards from './components/AnalyticsCards';
 import RefreshTimer from './components/RefreshTimer';
+import Sidebar from './components/Sidebar';
+import BottomNav from './components/BottomNav';
 
 import { wallbitData } from './data/mockData';
 import type { DashboardData } from './types/dashboard';
@@ -40,6 +42,7 @@ function App() {
   const [showBalances, setShowBalances] = useState(true);
   const [isLocked, setIsLocked] = useState(false);
   const [tokenInput, setTokenInput] = useState('');
+  const [activeSection, setActiveSection] = useState('saldos');
 
   // Theme effect
   useEffect(() => {
@@ -169,23 +172,11 @@ function App() {
   }
 
   return (
-    <main className="animate-in" style={{ padding: 'max(1.5rem, 4vw)', maxWidth: '1440px', margin: '0 auto' }}>
-      <header className="header-content stagger-1" style={{ marginBottom: 'var(--space-section)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem' }}>
+    <div className="app-layout">
+      <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+      <main className="main-content animate-in" style={{ padding: 'max(1.5rem, 4vw)', maxWidth: '1440px', margin: '0 auto', width: '100%' }}>
+        <header className="header-content stagger-1" style={{ marginBottom: 'var(--space-section)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem' }}>
         <div style={{ flex: '1 1 auto', minWidth: '240px', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <div className="glass" style={{ 
-            width: '64px', 
-            height: '64px', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            color: 'hsl(var(--primary))',
-            flexShrink: 0,
-            borderRadius: '1.25rem',
-            border: '2px solid hsla(var(--primary), 0.2)',
-            boxShadow: '0 0 30px -5px hsla(var(--primary), 0.3)'
-          }}>
-            <Wallet size={36} strokeWidth={2.5} />
-          </div>
           <div>
             <h1 style={{ fontSize: 'clamp(2rem, 6vw, 3.5rem)', margin: 0, fontWeight: 900, lineHeight: 1, letterSpacing: '-0.04em' }}>
               Hola, <span className="gradient-text">Johann</span>
@@ -233,18 +224,26 @@ function App() {
       </header>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
-        <div className="stagger-2" style={{ marginBottom: 'var(--space-section)' }}>
-          <BalanceCards checking={data.checking} stocks={data.stocks} showBalances={showBalances} arsRate={data.arsRate || 1000} />
-        </div>
-        <div className="stagger-3" style={{ marginBottom: 'var(--space-section)' }}>
-          <RecentExpenses data={data.recentExpenses} arsRate={data.arsRate || 1000} />
-        </div>
-        <div className="stagger-4" style={{ marginBottom: 'var(--space-section)' }}>
-          <AnalyticsCards transactions={data.transactions} arsRate={data.arsRate || 1000} />
-        </div>
-        <div className="stagger-5">
-          <TransactionList transactions={data.transactions} />
-        </div>
+        {activeSection === 'saldos' && (
+          <div key="saldos" className="animate-in" style={{ animationDuration: '0.5s', marginBottom: 'var(--space-section)' }}>
+            <BalanceCards checking={data.checking} stocks={data.stocks} showBalances={showBalances} arsRate={data.arsRate || 1000} />
+          </div>
+        )}
+        {activeSection === 'gastos' && (
+          <div key="gastos" className="animate-in" style={{ animationDuration: '0.5s', marginBottom: 'var(--space-section)' }}>
+            <RecentExpenses data={data.recentExpenses} arsRate={data.arsRate || 1000} />
+          </div>
+        )}
+        {activeSection === 'analisis' && (
+          <div key="analisis" className="animate-in" style={{ animationDuration: '0.5s', marginBottom: 'var(--space-section)' }}>
+            <AnalyticsCards transactions={data.transactions} arsRate={data.arsRate || 1000} />
+          </div>
+        )}
+        {activeSection === 'transacciones' && (
+          <div key="transacciones" className="animate-in" style={{ animationDuration: '0.5s' }}>
+            <TransactionList transactions={data.transactions} />
+          </div>
+        )}
       </div>
 
       <footer style={{ marginTop: '6rem', opacity: 0.2, textAlign: 'center', fontSize: '0.75rem', paddingBottom: '3rem' }}>
@@ -254,6 +253,7 @@ function App() {
         )}
       </footer>
 
+      <BottomNav activeSection={activeSection} onSectionChange={setActiveSection} />
       <style>{`
         .theme-btn {
           width: 36px;
@@ -280,7 +280,8 @@ function App() {
           box-shadow: 0 4px 15px -3px hsla(var(--primary), 0.5);
         }
       `}</style>
-    </main>
+      </main>
+    </div>
   );
 }
 
