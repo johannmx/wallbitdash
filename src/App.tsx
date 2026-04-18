@@ -174,7 +174,7 @@ function App() {
   return (
     <div className="app-layout">
       <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
-      <main className="main-content animate-in" style={{ padding: 'max(1.5rem, 4vw)', maxWidth: '1440px', margin: '0 auto', width: '100%' }}>
+      <main className="main-content animate-in" style={{ padding: 'clamp(1rem, 3vw, 2rem)', maxWidth: '1440px', margin: '0 auto', width: '100%' }}>
         <header className="header-content stagger-1" style={{ marginBottom: 'var(--space-section)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem' }}>
         <div style={{ flex: '1 1 auto', minWidth: '240px', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           <div>
@@ -253,6 +253,7 @@ function App() {
         )}
       </footer>
 
+      </main>
       <BottomNav activeSection={activeSection} onSectionChange={setActiveSection} />
       <style>{`
         .theme-btn {
@@ -280,7 +281,6 @@ function App() {
           box-shadow: 0 4px 15px -3px hsla(var(--primary), 0.5);
         }
       `}</style>
-      </main>
     </div>
   );
 }
