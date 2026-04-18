@@ -13,7 +13,7 @@ const API_URL = '/api/dashboard';
 
 const getHeaders = () => {
   // Prevent relying on build-time env vars for backend secrets
-  const token = localStorage.getItem('dashboard_token') || '';
+  const token = sessionStorage.getItem('dashboard_token') || '';
   return {
     'Content-Type': 'application/json',
     ...(token ? { 'X-Dashboard-Token': token } : {})
@@ -82,7 +82,7 @@ function App() {
 
   const handleSaveToken = () => {
     if (tokenInput.trim()) {
-      localStorage.setItem('dashboard_token', tokenInput.trim());
+      sessionStorage.setItem('dashboard_token', tokenInput.trim());
       setIsLocked(false);
       fetchDashboard();
     }
