@@ -1,0 +1,15 @@
+--- server/index.js
++++ server/index.js
+@@ -239,6 +239,12 @@
+   });
+ });
+
++// Security Enhancement: Catch-all 404 handler to prevent Express from leaking framework details via default HTML responses
++app.use((req, res) => {
++  console.warn(`🔒 Audit: 404 Not Found on ${req.method} ${req.originalUrl} from IP: ${req.ip || 'Unknown'}`);
++  res.status(404).json({ error: 'Not Found' });
++});
++
+ // Security Enhancement: Global error handler to prevent stack trace leaks
+ // Ensures errors return secure JSON responses instead of exposing internals via HTML
+ app.use((err, req, res, next) => {

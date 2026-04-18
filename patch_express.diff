@@ -1,0 +1,18 @@
+--- server/index.js
++++ server/index.js
+@@ -60,6 +60,15 @@
+
+ app.use(express.json());
+
++// Catch malformed JSON payloads specifically to prevent stack trace leaks
++app.use((err, req, res, next) => {
++  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
++    console.warn(`🔒 Audit: Malformed JSON payload from IP: ${req.ip || 'Unknown'}`);
++    return res.status(400).json({ error: 'Bad Request: Malformed JSON payload' });
++  }
++  next(err);
++});
++
+ // Auth Middleware
+ const authMiddleware = (req, res, next) => {
+   if (!DASHBOARD_TOKEN) {
