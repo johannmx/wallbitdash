@@ -40,13 +40,13 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
     const monthlyARS: Record<string, number> = {};
     const monthsNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
     
-    transactions
-      .filter(tx => tx.type.toLowerCase().includes('deposit_local') && tx.status === 'COMPLETED')
-      .forEach(tx => {
+    for (const tx of transactions) {
+      if (tx.status === 'COMPLETED' && tx.type.toLowerCase().includes('deposit_local')) {
         const d = new Date(tx.date + 'T00:00:00Z');
         const monthKey = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`;
         monthlyARS[monthKey] = (monthlyARS[monthKey] || 0) + parseFloat(tx.amount);
-      });
+      }
+    }
 
     return Object.entries(monthlyARS)
       .map(([key, amount]) => {
@@ -76,15 +76,15 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
       'Blockchain Withdrawal': 0
     };
 
-    transactions
-      .filter(tx => tx.status === 'COMPLETED' || tx.status === 'PENDING')
-      .forEach(tx => {
+    for (const tx of transactions) {
+      if (tx.status === 'COMPLETED' || tx.status === 'PENDING') {
         const type = tx.type.toLowerCase();
         if (type.includes('withdrawal_local')) breakdown['Withdrawal Local'] += parseFloat(tx.amount);
         else if (type.includes('pay_qr')) breakdown['Pay QR'] += parseFloat(tx.amount);
         else if (type.includes('card_spent')) breakdown['Card Spent'] += parseFloat(tx.amount);
         else if (type.includes('blockchain_withdrawal')) breakdown['Blockchain Withdrawal'] += parseFloat(tx.amount);
-      });
+      }
+    }
 
     return Object.entries(breakdown)
       .filter(([_, value]) => value > 0)
