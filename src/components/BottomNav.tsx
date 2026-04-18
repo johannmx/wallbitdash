@@ -11,7 +11,7 @@ export default function BottomNav({ activeSection, onSectionChange }: BottomNavP
       className="bottom-nav glass" 
       style={{
         position: 'fixed',
-        bottom: '1.5rem',
+        bottom: 'max(env(safe-area-inset-bottom), 1.5rem)',
         left: '50%',
         transform: 'translateX(-50%)',
         width: 'calc(100% - 3rem)',
@@ -23,7 +23,7 @@ export default function BottomNav({ activeSection, onSectionChange }: BottomNavP
         boxShadow: '0 10px 40px -10px rgba(0,0,0,0.3), 0 0 0 1px hsla(var(--primary), 0.1)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        background: 'rgba(20, 20, 20, 0.7)' // dark pill style
+        background: 'var(--glass-bg)'
       }}
     >
       {SECTIONS.map(({ id, label, icon: Icon }) => (
@@ -41,7 +41,7 @@ export default function BottomNav({ activeSection, onSectionChange }: BottomNavP
             borderRadius: '1.5rem',
             border: 'none',
             background: activeSection === id ? 'hsla(var(--primary), 0.15)' : 'transparent',
-            color: activeSection === id ? 'hsl(var(--primary))' : 'rgba(255, 255, 255, 0.5)',
+            color: activeSection === id ? 'hsl(var(--primary))' : 'hsl(var(--foreground) / 0.5)',
             fontWeight: 800,
             cursor: 'pointer',
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
