@@ -179,6 +179,10 @@ h1, h2, h3, h4, .brand-font {
   width: 100%;
 }
 
+.dashboard-grid > div {
+  min-width: 0;
+}
+
 @media (max-width: 1024px) {
   .dashboard-grid > div {
     grid-column: span 12 !important;
