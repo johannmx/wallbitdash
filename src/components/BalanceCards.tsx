@@ -76,7 +76,7 @@ const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, a
           }} />
 
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <h3 style={{ opacity: 0.3, fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', margin: 0 }}>Available Capital</h3>
               <div style={{ color: 'hsl(var(--success))', fontSize: '0.9rem', fontWeight: 800, fontFamily: "'JetBrains Mono', monospace", display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <span style={{ position: 'relative', top: '1px' }}>↑</span> 2.4% <span style={{ opacity: 0.3, color: 'hsl(var(--foreground))', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.05em' }}>TRENDING</span>
@@ -107,13 +107,13 @@ const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, a
           border: '1px solid var(--border)',
           borderRadius: '1.25rem'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <h3 style={{ opacity: 0.3, fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', margin: 0 }}>Investment Portfolio</h3>
             <div style={{ color: 'hsl(var(--success))', fontSize: '0.85rem', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <span style={{ position: 'relative', top: '1px' }}>↑</span> 12.8%
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '2.5rem', fontWeight: 800 }}>
               {showBalances ? `$${stocks.balance}` : '••••••'}
             </span>
