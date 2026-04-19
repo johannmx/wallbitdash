@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import type { FC, CSSProperties } from 'react';
 import { useMemo, useState } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
@@ -11,6 +11,106 @@ interface AnalyticsCardsProps {
   transactions: Transaction[];
   arsRate: number;
 }
+
+
+const styles: Record<string, CSSProperties> = {
+  container: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(12, 1fr)',
+    gap: 'var(--space-group)'
+  },
+  dominantCard: {
+    gridColumn: 'span 8',
+    padding: 'var(--space-item) 2.5rem',
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  cardHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: '2rem'
+  },
+  titleGroup: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem'
+  },
+  title: {
+    fontSize: '1.25rem',
+    fontWeight: 900
+  },
+  subtitle: {
+    opacity: 0.4,
+    fontSize: '0.75rem',
+    fontWeight: 600,
+    textTransform: 'uppercase'
+  },
+  usdRef: {
+    fontSize: '0.7rem',
+    opacity: 0.4,
+    fontWeight: 700,
+    textTransform: 'uppercase'
+  },
+  usdValue: {
+    fontSize: '1.4rem',
+    fontWeight: 900
+  },
+  expenseValue: {
+    fontSize: '1.4rem',
+    fontWeight: 900,
+    color: 'hsl(var(--error))'
+  },
+  chartContainer: {
+    width: '100%',
+    height: '220px'
+  },
+  secondaryCard: {
+    gridColumn: 'span 4',
+    padding: 'var(--space-item) 2.5rem'
+  },
+  footerNote: {
+    marginTop: '1rem',
+    paddingTop: '1rem',
+    borderTop: '1px solid var(--border)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.7rem',
+    opacity: 0.5
+  },
+  tooltipGlass: {
+    padding: '0.75rem',
+    border: '1px solid var(--glass-border)',
+    background: 'var(--glass-bg)',
+    color: 'hsl(var(--foreground))'
+  },
+  tooltipTitle: {
+    fontWeight: 700,
+    marginBottom: '0.25rem'
+  },
+  tooltipValue: {
+    color: 'hsl(var(--primary))'
+  },
+  tooltipSubValue: {
+    opacity: 0.6,
+    fontSize: '0.7rem'
+  },
+  tooltipGlassPie: {
+    padding: '0.6rem 0.8rem',
+    border: '1px solid var(--glass-border)',
+    background: 'var(--glass-bg)',
+    color: 'hsl(var(--foreground))'
+  },
+  tooltipPieTitle: {
+    fontWeight: 700,
+    fontSize: '0.85rem'
+  },
+  tooltipPieValue: {
+    fontSize: '0.9rem',
+    fontWeight: 800
+  }
+};
 
 const COLORS = ['#6366f1', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#0ea5e9'];
 
@@ -107,24 +207,24 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
   };
 
   return (
-    <div className="analytics-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 'var(--space-group)' }}>
+    <div className="analytics-container" style={styles.container}>
       
       {/* Deposit Bar Chart (Monthly ARS) - Dominant Card */}
-      <div className="glass" style={{ gridColumn: 'span 8', padding: 'var(--space-item) 2.5rem', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div className="glass" style={styles.dominantCard}>
+        <div style={styles.cardHeader}>
+          <div style={styles.titleGroup}>
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 900 }}>Depósitos Locales</h3>
-              <p style={{ opacity: 0.4, fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Histórico mensual ARS</p>
+              <h3 style={styles.title}>Depósitos Locales</h3>
+              <p style={styles.subtitle}>Histórico mensual ARS</p>
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '0.7rem', opacity: 0.4, fontWeight: 700, textTransform: 'uppercase' }}>Ref. USD</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 900 }}>${totalInUSD}</div>
+            <div style={styles.usdRef}>Ref. USD</div>
+            <div style={styles.usdValue}>${totalInUSD}</div>
           </div>
         </div>
         
-        <div style={{ width: '100%', height: '220px' }}>
+        <div style={styles.chartContainer}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={monthlyDepositData}>
               <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} vertical={false} />
@@ -137,10 +237,10 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
                         const val = payload[0].value as number;
                         const usdVal = (val / (arsRate || 1)).toFixed(2);
                         return (
-                            <div className="glass" style={{ padding: '0.75rem', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'hsl(var(--foreground))' }}>
-                                <div style={{ fontWeight: 700, marginBottom: '0.25rem' }}>{payload[0].payload.name}</div>
-                                <div style={{ color: 'hsl(var(--primary))' }}>ARS: ${val.toLocaleString()}</div>
-                                <div style={{ opacity: 0.6, fontSize: '0.7rem' }}>USD Ref: ${usdVal}</div>
+                            <div className="glass" style={styles.tooltipGlass}>
+                                <div style={styles.tooltipTitle}>{payload[0].payload.name}</div>
+                                <div style={styles.tooltipValue}>ARS: ${val.toLocaleString()}</div>
+                                <div style={styles.tooltipSubValue}>USD Ref: ${usdVal}</div>
                             </div>
                         );
                     }
@@ -152,28 +252,28 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
           </ResponsiveContainer>
         </div>
 
-        <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.7rem', opacity: 0.5 }}>
+        <div style={styles.footerNote}>
           <DollarSign size={14} />
           <span>Calculado con Dólar Oficial: 1 USD = {arsRate} ARS</span>
         </div>
       </div>
 
       {/* Expense Pie Chart - Secondary Card */}
-      <div className="glass" style={{ gridColumn: 'span 4', padding: 'var(--space-item) 2.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div className="glass" style={styles.secondaryCard}>
+        <div style={styles.cardHeader}>
+          <div style={styles.titleGroup}>
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 900 }}>Distribución</h3>
-              <p style={{ opacity: 0.4, fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Ranking por consumo</p>
+              <h3 style={styles.title}>Distribución</h3>
+              <p style={styles.subtitle}>Ranking por consumo</p>
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '0.7rem', opacity: 0.4, fontWeight: 700, textTransform: 'uppercase' }}>Total USD</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'hsl(var(--error))' }}>${totalExpenseUSD}</div>
+            <div style={styles.usdRef}>Total USD</div>
+            <div style={styles.expenseValue}>${totalExpenseUSD}</div>
           </div>
         </div>
 
-        <div style={{ width: '100%', height: '220px' }}>
+        <div style={styles.chartContainer}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -199,9 +299,9 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
                 content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                         return (
-                            <div className="glass" style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'hsl(var(--foreground))' }}>
-                                <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{payload[0].name}</div>
-                                <div style={{ color: payload[0].fill, fontSize: '0.9rem', fontWeight: 800 }}>
+                            <div className="glass" style={styles.tooltipGlassPie}>
+                                <div style={styles.tooltipPieTitle}>{payload[0].name}</div>
+                                <div style={{ ...styles.tooltipPieValue, color: payload[0].fill }}>
                                     ${(payload[0].value as number).toFixed(2)} USD
                                 </div>
                             </div>
