@@ -22,8 +22,8 @@ const DolarPill: FC<DolarPillProps> = ({ isHeader = false }) => {
     const fetchRates = async () => {
       try {
         const [oficialRes, cclRes] = await Promise.all([
-          fetch('https://dolarapi.com/v1/dolares/oficial'),
-          fetch('https://dolarapi.com/v1/dolares/contadoconliqui')
+          fetch('https://dolarapi.com/v1/dolares/oficial', { signal: AbortSignal.timeout(5000) }),
+          fetch('https://dolarapi.com/v1/dolares/contadoconliqui', { signal: AbortSignal.timeout(5000) })
         ]);
         
         if (oficialRes.ok && cclRes.ok) {

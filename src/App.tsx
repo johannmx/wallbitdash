@@ -65,7 +65,10 @@ function App() {
   // Data fetch
   const fetchDashboard = async () => {
     try {
-      const res = await fetch(API_URL, { headers: getHeaders() });
+      const res = await fetch(API_URL, {
+        headers: getHeaders(),
+        signal: AbortSignal.timeout(10000)
+      });
       if (res.status === 401) {
         setIsLocked(true);
         return;
@@ -95,7 +98,10 @@ function App() {
 
   const handleRefresh = async () => {
     try {
-      const res = await fetch(API_URL, { headers: getHeaders() });
+      const res = await fetch(API_URL, {
+        headers: getHeaders(),
+        signal: AbortSignal.timeout(10000)
+      });
       if (res.status === 401) {
         setIsLocked(true);
         throw new Error('Unauthorized');
@@ -137,6 +143,7 @@ function App() {
             value={tokenInput}
             onChange={(e) => setTokenInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSaveToken()}
+            maxLength={256}
             className="glass"
             style={{ 
               width: '100%', 
