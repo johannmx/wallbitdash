@@ -112,6 +112,7 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
               placeholder="Buscar registros..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              maxLength={256} // 🛡️ Sentinel: Enforce max length to prevent Client-Side DoS via excessive filtering payload
               style={{ 
                 background: 'hsla(var(--foreground), 0.05)', 
                 border: '1px solid var(--border)',
