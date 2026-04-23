@@ -1,6 +1,6 @@
 export const fetchWallbitRate = async (apiKey, fetchImpl = fetch) => {
   try {
-    const res = await fetchImpl('https://api.wallbit.io/api/public/v1/rates', {
+    const res = await fetchImpl('https://api.wallbit.io/api/public/v1/rates?source_currency=ARS&dest_currency=USD', {
       headers: { 'X-API-Key': apiKey },
       signal: AbortSignal.timeout(5000)
     });
