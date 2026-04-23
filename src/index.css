@@ -140,6 +140,11 @@ h1, h2, h3, h4, .brand-font {
   100% { transform: translateX(200%) skewX(-20deg); opacity: 0; }
 }
 
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;

@@ -254,7 +254,7 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
 
         <div style={styles.footerNote}>
           <DollarSign size={14} />
-          <span>Calculado con Dólar Oficial: 1 USD = {arsRate} ARS</span>
+          <span>Wallbit Rate: 1 USD = {arsRate} ARS</span>
         </div>
       </div>
 

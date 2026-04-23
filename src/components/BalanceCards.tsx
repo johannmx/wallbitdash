@@ -36,9 +36,10 @@ interface BalanceCardsProps {
   stocks: { balance: string; currency: string };
   showBalances: boolean;
   arsRate: number;
+  arsRateUpdatedAt?: string;
 }
 
-const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, arsRate }) => {
+const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, arsRate, arsRateUpdatedAt }) => {
   return (
     <>
       <div className="dashboard-grid" style={{ gap: 'var(--space-group)' }}>
@@ -94,7 +95,11 @@ const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, a
               <div className="ars-pill-hero">
                 VALUE IN ARS <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>{showBalances ? <CountUp end={parseFloat(checking.balance) * arsRate} duration={2000} showBalances={showBalances} /> : '••••'}</span>
               </div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.3, fontWeight: 600 }}>LIQUID ASSETS • NO LOCKS</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.7rem', opacity: 0.4, fontWeight: 700 }}>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", color: 'hsl(var(--primary))', opacity: 1, fontWeight: 800, fontSize: '0.75rem' }}>1 USD = {arsRate.toLocaleString('es-AR')} ARS</span>
+                <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'hsl(var(--success))', display: 'inline-block', animation: 'pulse-dot 2s infinite' }} />
+                <span>WALLBIT RATE{arsRateUpdatedAt ? ` • ${new Date(arsRateUpdatedAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}` : ''}</span>
+              </div>
             </div>
           </div>
         </div>

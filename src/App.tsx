@@ -233,7 +233,7 @@ function App() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
         {activeSection === 'saldos' && (
           <div key="saldos" className="animate-in" style={{ animationDuration: '0.5s', marginBottom: 'var(--space-section)' }}>
-            <BalanceCards checking={data.checking} stocks={data.stocks} showBalances={showBalances} arsRate={data.arsRate || 1000} />
+            <BalanceCards checking={data.checking} stocks={data.stocks} showBalances={showBalances} arsRate={data.arsRate || 1000} arsRateUpdatedAt={data.arsRateUpdatedAt} />
           </div>
         )}
         {activeSection === 'gastos' && (
