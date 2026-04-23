@@ -4,7 +4,7 @@ import cron from 'node-cron';
 import fs from 'fs';
 import path from 'path';
 import { saveToPersistence as saveToPersistenceLib } from './persistence.js';
-import { fetchDolarRate } from './dolar.js';
+import { fetchWallbitRate } from './dolar.js';
 import { fileURLToPath } from 'url';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -178,7 +178,7 @@ const fetchWallbitData = async () => {
   console.log('🔄 Refreshing data from Wallbit API...');
 
   try {
-    const arsRate = await fetchDolarRate();
+    const { rate: arsRate, updatedAt: arsRateUpdatedAt } = await fetchWallbitRate(API_KEY);
 
     // 1. Fetch Checking Balance
     const checkingRes = await fetchWithTimeout(`${API_BASE}/balance/checking`, { headers });
@@ -244,6 +244,7 @@ const fetchWallbitData = async () => {
 
     // 6. Update Cache
     cache.arsRate = arsRate;
+    cache.arsRateUpdatedAt = arsRateUpdatedAt;
     cache.transactions = mappedTxs;
     cache.recentExpenses = {
       title: "Gastos últimos 7 días",
