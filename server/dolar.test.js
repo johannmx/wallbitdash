@@ -4,10 +4,10 @@ import { fetchDolarRate } from './dolar.js';
 
 test('fetchDolarRate returns venta value on success', async (t) => {
   const mockFetch = async (url) => {
-    assert.strictEqual(url, 'https://dolarapi.com/v1/dolares/oficial');
+    assert.strictEqual(url, 'https://api.wallbit.io/api/public/v1/rates?source_currency=ARS&dest_currency=USD');
     return {
       ok: true,
-      json: async () => ({ venta: 1234.56 })
+      json: async () => ({ data: { rate: 1234.56 } })
     };
   };
 
