@@ -47,3 +47,8 @@
 **Vulnerability:** External `fetch` calls in the frontend (`src/App.tsx` and `src/components/DolarPill.tsx`) lacked a timeout mechanism. The token input in `src/App.tsx` also lacked a maximum length limit, allowing arbitrarily large payloads to be pasted on the client-side.
 **Learning:** `fetch` calls in the browser do not time out by default. If an external API is slow or hangs, the application UI can hang indefinitely, leading to a degraded user experience or resource exhaustion. Furthermore, defense-in-depth requires enforcing length limits (like `maxLength={256}`) on the client-side to prevent users from accidentally or intentionally pasting massive strings, matching the backend's validation.
 **Prevention:** Always use `AbortSignal.timeout(ms)` with `fetch` calls in the frontend to ensure requests fail fast. Enforce `maxLength` on form inputs handling sensitive or potentially large data.
+
+## 2026-04-25 - [Preventing CRLF / Log Injection Vulnerabilities]
+**Vulnerability:** Unsanitized user-controlled input (`req.originalUrl`) was being directly embedded into a log entry in the global 404 handler. An attacker could send requests with URL paths containing carriage return and line feed characters (`\r\n`), forging arbitrary log entries and obscuring true malicious activity.
+**Learning:** Never trust input originating from the client, even metadata like URLs, headers, or parameters, when appending them to server logs or terminal output. Log injection degrades the integrity of the audit trail.
+**Prevention:** Always sanitize untrusted input before logging by stripping or encoding newline characters (e.g., using `.replace(/[\r\n]/g, '')`). Use structured logging (like JSON) where applicable to mitigate injection risks entirely.

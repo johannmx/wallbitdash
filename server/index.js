@@ -292,7 +292,8 @@ app.get('/api/dashboard', dashboardLimiter, authMiddleware, (req, res) => {
 
 // Security Enhancement: Catch-all 404 handler to prevent Express from leaking framework details via default HTML responses
 app.use((req, res) => {
-  console.warn(`🔒 Audit: 404 Not Found on ${req.method} ${req.originalUrl} from IP: ${req.ip || 'Unknown'}`);
+  const sanitizedUrl = req.originalUrl.replace(/[\r\n]/g, '');
+  console.warn(`🔒 Audit: 404 Not Found on ${req.method} ${sanitizedUrl} from IP: ${req.ip || 'Unknown'}`);
   res.status(404).json({ error: 'Not Found' });
 });
 
