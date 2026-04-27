@@ -47,3 +47,11 @@
 **Vulnerability:** External `fetch` calls in the frontend (`src/App.tsx` and `src/components/DolarPill.tsx`) lacked a timeout mechanism. The token input in `src/App.tsx` also lacked a maximum length limit, allowing arbitrarily large payloads to be pasted on the client-side.
 **Learning:** `fetch` calls in the browser do not time out by default. If an external API is slow or hangs, the application UI can hang indefinitely, leading to a degraded user experience or resource exhaustion. Furthermore, defense-in-depth requires enforcing length limits (like `maxLength={256}`) on the client-side to prevent users from accidentally or intentionally pasting massive strings, matching the backend's validation.
 **Prevention:** Always use `AbortSignal.timeout(ms)` with `fetch` calls in the frontend to ensure requests fail fast. Enforce `maxLength` on form inputs handling sensitive or potentially large data.
+
+## 2026-04-27 - [Preventing CRLF Injection in Express Logs]
+**Vulnerability:** The application was directly interpolating user-controlled input (`req.originalUrl`) into a log statement (e.g., `console.warn`) in the 404 handler. This allows an attacker to perform a Carriage Return Line Feed (CRLF) injection attack, sometimes called Log Forging, by including newline characters ( or
+) in the URL.
+**Learning:** Unsanitized user input in log files can be used to forge fake log entries, mask malicious activity, or exploit vulnerabilities in log parsing tools.
+**Prevention:** Always sanitize potentially dangerous characters from user-controlled inputs like URLs, headers, and request bodies before logging them. Specifically, strip out carriage returns () and line feeds (
+) using a regex replacement like `.replace(/[
+]/g, '')`.
