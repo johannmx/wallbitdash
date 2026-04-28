@@ -53,7 +53,8 @@ app.use(cors({
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
-    console.warn(`🔒 CORS blocked request from unauthorized origin: ${origin}`);
+    const safeOrigin = String(origin).replace(/[\r\n]/g, '');
+    console.warn(`🔒 CORS blocked request from unauthorized origin: ${safeOrigin}`);
     return callback(new Error('CORS blocked'), false);
   }
 }));
@@ -292,7 +293,8 @@ app.get('/api/dashboard', dashboardLimiter, authMiddleware, (req, res) => {
 
 // Security Enhancement: Catch-all 404 handler to prevent Express from leaking framework details via default HTML responses
 app.use((req, res) => {
-  console.warn(`🔒 Audit: 404 Not Found on ${req.method} ${req.originalUrl} from IP: ${req.ip || 'Unknown'}`);
+  const safeUrl = String(req.originalUrl).replace(/[\r\n]/g, '');
+  console.warn(`🔒 Audit: 404 Not Found on ${req.method} ${safeUrl} from IP: ${req.ip || 'Unknown'}`);
   res.status(404).json({ error: 'Not Found' });
 });
 
