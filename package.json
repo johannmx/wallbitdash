@@ -21,7 +21,7 @@
     "node-cron": "^4.2.1",
     "concurrently": "^9.2.1",
     "recharts": "^3.8.1",
-    "lucide-react": "^1.8.0",
+    "lucide-react": "^1.14.0",
     "helmet": "^8.0.0",
     "express-rate-limit": "^8.4.0"
   },
