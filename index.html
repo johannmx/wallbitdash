@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=3" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 🛡️ Sentinel: Enforce strict CSP to mitigate XSS and prevent data exfiltration -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://dolarapi.com ws: wss:; font-src 'self' data:;" />
     <title>Wallbit Dash | Premium Portfolio</title>
     <meta name="description" content="Dashboard moderno y premium para el análisis de finanzas personales en Wallbit." />
   </head>
