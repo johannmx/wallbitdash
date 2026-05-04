@@ -52,3 +52,8 @@
 **Vulnerability:** The application was logging user-controlled input (`origin` in CORS configuration and `req.originalUrl` in the 404 catch-all handler) directly to `console.warn` without sanitization. An attacker could inject Carriage Return (`\r`) and Line Feed (`\n`) characters into these values, allowing them to split the log entry and inject forged log lines (Log Injection / CRLF Injection).
 **Learning:** Directly logging unsanitized HTTP request data (like headers, URLs, or body contents) provides a vector for attackers to manipulate server logs. This can be used to cover tracks, confuse monitoring systems, or trigger false alerts in log aggregation tools.
 **Prevention:** Always sanitize untrusted input before writing it to logs. At a minimum, convert the input to a string and strip or encode newline characters (`[\r\n]`). For example, `String(input).replace(/[\r\n]/g, '')`.
+
+## 2024-05-04 - [Preventing Express.js Unbounded Payload DoS]
+**Vulnerability:** The Express.js JSON body parser (`app.use(express.json())`) was configured without a strict maximum payload size. An attacker could send a massively large JSON payload, causing memory exhaustion on the server, garbage collection spikes, and leading to a Denial of Service (DoS) attack.
+**Learning:** Default framework configurations often prioritize functionality over strict security constraints. Any endpoint that parses user-provided data must have clear and enforced boundaries. Express body parsers can accept payloads of any size by default unless explicitly constrained.
+**Prevention:** Always configure `express.json()` and `express.urlencoded()` with a sensible `limit` option (e.g., `{ limit: '10kb' }`) appropriate for the expected payload size of the application.
