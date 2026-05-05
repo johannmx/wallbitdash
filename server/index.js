@@ -59,13 +59,18 @@ app.use(cors({
   }
 }));
 
-app.use(express.json());
+// Security Enhancement: Enforce strict payload size limit to prevent memory exhaustion and DoS
+app.use(express.json({ limit: '10kb' }));
 
-// Catch malformed JSON payloads specifically to prevent stack trace leaks
+// Catch malformed JSON payloads and size limit errors specifically to prevent stack trace leaks
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
     console.warn(`🔒 Audit: Malformed JSON payload from IP: ${req.ip || 'Unknown'}`);
     return res.status(400).json({ error: 'Bad Request: Malformed JSON payload' });
+  }
+  if (err.type === 'entity.too.large') {
+    console.warn(`🔒 Audit: Payload too large from IP: ${req.ip || 'Unknown'}`);
+    return res.status(413).json({ error: 'Payload Too Large' });
   }
   next(err);
 });
