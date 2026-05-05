@@ -33,12 +33,11 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
-          color: 'hsl(var(--primary))',
           borderRadius: '1rem',
           border: '2px solid hsla(var(--primary), 0.2)',
           boxShadow: '0 0 30px -5px hsla(var(--primary), 0.3)'
         }}>
-          <Wallet size={24} strokeWidth={2.5} />
+          <img src="/wallbit.svg" alt="Wallbit Logo" width={24} height={24} />
         </div>
         <div>
           <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 900, lineHeight: 1 }}>Wallbit<span className="gradient-text">Dash</span></h2>
