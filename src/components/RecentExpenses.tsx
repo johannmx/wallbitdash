@@ -18,7 +18,7 @@ const RecentExpenses: FC<RecentExpensesProps> = ({ data, arsRate }) => {
         {/* Summary Card - Reduced width for list dominance */}
         <div className="glass" style={{ 
           gridColumn: 'span 3',
-          padding: '2.5rem', 
+          padding: 'clamp(1rem, 2vw, 2.5rem)', 
           display: 'flex', 
           flexDirection: 'column', 
           justifyContent: 'center',
@@ -29,8 +29,8 @@ const RecentExpenses: FC<RecentExpensesProps> = ({ data, arsRate }) => {
           borderRadius: '1.25rem'
         }}>
           <h3 style={{ opacity: 0.5, fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '0.05em' }}>Total (7 días)</h3>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '1.5rem' }}>
-            <span style={{ fontSize: '3rem', fontWeight: 900 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+            <span style={{ fontSize: 'clamp(1.8rem, 3vw, 3rem)', fontWeight: 900 }}>
               ${data.totalSpent}
             </span>
             <span style={{ opacity: 0.4, fontWeight: 700 }}>USD</span>
@@ -102,7 +102,7 @@ const RecentExpenses: FC<RecentExpensesProps> = ({ data, arsRate }) => {
                 grid-template-columns: 1fr !important; 
                 gap: 1.5rem !important;
             }
-            .glass[style*="grid-column: span 4"] { 
+            .glass[style*="grid-column: span 3"] { 
                 grid-column: span 1 !important; 
                 width: 100% !important;
             }
