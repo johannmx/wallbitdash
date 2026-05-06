@@ -59,13 +59,19 @@ app.use(cors({
   }
 }));
 
-app.use(express.json());
+// Security Enhancement: Limit JSON payload size to 10kb to prevent Denial of Service (DoS) attacks
+app.use(express.json({ limit: '10kb' }));
 
 // Catch malformed JSON payloads specifically to prevent stack trace leaks
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
     console.warn(`🔒 Audit: Malformed JSON payload from IP: ${req.ip || 'Unknown'}`);
     return res.status(400).json({ error: 'Bad Request: Malformed JSON payload' });
+  }
+  // Security Enhancement: Handle Payload Too Large errors gracefully to prevent stack trace leaks
+  if (err.type === 'entity.too.large') {
+    console.warn(`🔒 Audit: Payload Too Large from IP: ${req.ip || 'Unknown'}`);
+    return res.status(413).json({ error: 'Payload Too Large' });
   }
   next(err);
 });
