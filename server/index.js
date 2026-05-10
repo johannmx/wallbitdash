@@ -44,7 +44,9 @@ if (!DASHBOARD_TOKEN) {
 // Security Middlewares
 app.use(helmet());
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173'];
+// Security Enhancement: Fail-closed approach for CORS configuration in production
+const defaultOrigins = process.env.NODE_ENV === 'production' ? [] : ['http://localhost:5173'];
+const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : defaultOrigins;
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl requests)

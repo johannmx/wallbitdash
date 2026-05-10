@@ -62,3 +62,8 @@
 **Vulnerability:** The Express body parser (`express.json()`) was configured without a `limit`, allowing attackers to send massive JSON payloads. This could lead to memory exhaustion and Denial of Service (DoS) attacks on the backend.
 **Learning:** By default, `express.json()` processes JSON bodies up to 100kb, which can still be significant for a simple API. But when limits aren't explicitly defined, it's easier to inadvertently introduce DoS vectors or miss handling `entity.too.large` errors, which could leak stack traces or cause unhandled exceptions.
 **Prevention:** Always set an explicit, strict payload size limit on body parsers (e.g., `express.json({ limit: '10kb' })`) tailored to the expected request sizes. Additionally, explicitly catch `err.type === 'entity.too.large'` in the subsequent error-handling middleware to return a safe `413 Payload Too Large` JSON response, avoiding HTML stack trace leaks.
+
+## 2026-05-10 - [Fail-closed CORS Configuration Pattern]
+**Vulnerability:** The application was configured to fail-open for its CORS origins `process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173']`. This insecure default allowed cross-origin requests from `http://localhost:5173` in production when the environment variable was missing.
+**Learning:** Security controls configured via environment variables must default to fail-closed to strictly deny access if the expected configuration is missing or incorrectly defined.
+**Prevention:** Always implement fail-closed defaults for mandatory security configurations (e.g., `process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : []`) and verify that external inputs adhere to this policy before granting access.
