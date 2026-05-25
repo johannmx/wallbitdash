@@ -67,3 +67,8 @@
 **Vulnerability:** The application was configured to fail-open for its CORS origins `process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173']`. This insecure default allowed cross-origin requests from `http://localhost:5173` in production when the environment variable was missing.
 **Learning:** Security controls configured via environment variables must default to fail-closed to strictly deny access if the expected configuration is missing or incorrectly defined.
 **Prevention:** Always implement fail-closed defaults for mandatory security configurations (e.g., `process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : []`) and verify that external inputs adhere to this policy before granting access.
+
+## 2026-05-25 - [Missing Security Headers in Static Frontend (Nginx)]
+**Vulnerability:** The static frontend served via Nginx was missing essential security headers (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`) and was leaking the server version (`server_tokens`). While the Express backend used `helmet`, these headers were not applied to the Nginx static server.
+**Learning:** Decoupled architectures require defense-in-depth at every layer. Backend security middlewares (like Helmet) do not protect static assets served directly by a reverse proxy or web server.
+**Prevention:** Always enforce strict security headers and disable server version leakage (`server_tokens off;`) directly in the static server configuration (e.g., `nginx.conf`) for frontend assets.
