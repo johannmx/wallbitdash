@@ -22,7 +22,7 @@
     "concurrently": "^10.0.1",
     "recharts": "^3.8.1",
     "lucide-react": "^1.17.0",
-    "helmet": "^8.0.0",
+    "helmet": "^8.2.0",
     "express-rate-limit": "^8.5.2"
   },
   "devDependencies": {
