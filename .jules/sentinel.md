@@ -72,3 +72,8 @@
 **Vulnerability:** The static frontend served via Nginx was missing essential security headers (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`) and was leaking the server version (`server_tokens`). While the Express backend used `helmet`, these headers were not applied to the Nginx static server.
 **Learning:** Decoupled architectures require defense-in-depth at every layer. Backend security middlewares (like Helmet) do not protect static assets served directly by a reverse proxy or web server.
 **Prevention:** Always enforce strict security headers and disable server version leakage (`server_tokens off;`) directly in the static server configuration (e.g., `nginx.conf`) for frontend assets.
+
+## 2026-06-08 - [Global Rate Limiting for DoS Protection]
+**Vulnerability:** The application only had rate limiting applied to the sensitive `/api/dashboard` endpoint. All other routes (e.g., 404 catch-alls, malformed JSON parsers) were unprotected, exposing the server to resource exhaustion via basic brute-force or broad Denial of Service (DoS) scanning attacks.
+**Learning:** While protecting sensitive endpoints is critical, attackers often scan or flood undefined routes to consume server resources (CPU, memory, connections) before hitting a specific endpoint. A defense-in-depth strategy requires a baseline protection for the entire application.
+**Prevention:** Apply a global rate limiter (e.g., using `express-rate-limit`) high up in the middleware chain (before route definitions) to establish a baseline defense against broad DoS attacks. Stricter, route-specific rate limits can then be applied on top of this global baseline.
