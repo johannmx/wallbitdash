@@ -44,6 +44,16 @@ if (!DASHBOARD_TOKEN) {
 // Security Middlewares
 app.use(helmet());
 
+// Security Enhancement: Global Rate Limiting to prevent DoS attacks and brute-force scanning
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // Limit each IP to 1000 requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' }
+});
+app.use(globalLimiter);
+
 // Security Enhancement: Fail-closed approach for CORS configuration in production
 const defaultOrigins = process.env.NODE_ENV === 'production' ? [] : ['http://localhost:5173'];
 const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : defaultOrigins;
