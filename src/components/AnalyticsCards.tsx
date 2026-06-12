@@ -287,6 +287,7 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
+                // @ts-expect-error Recharts 3.x PieProps are missing activeIndex prop
                 activeIndex={activeIndex}
                 activeShape={renderActiveShape}
                 data={expenseBreakdown}
