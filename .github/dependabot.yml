@@ -6,6 +6,10 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    groups:
+      all-npm-deps:
+        patterns:
+          - "*"
 
   # 2. Actualizaciones para Docker (Dockerfile.frontend, Dockerfile.backend)
   - package-ecosystem: "docker"
