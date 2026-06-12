@@ -25,7 +25,8 @@ export default function BottomNav({ activeSection, onSectionChange }: BottomNavP
         WebkitBackdropFilter: 'blur(20px)',
         background: 'var(--glass-bg)'
       }}
-    >\n      {SECTIONS.map(({ id, label, icon: Icon }) => (
+    >
+      {SECTIONS.map(({ id, label, icon: Icon }) => (
         <button
           key={id}
           onClick={() => onSectionChange(id)}

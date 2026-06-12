@@ -32,7 +32,7 @@ const CountUp: FC<{ end: number, duration?: number, showBalances: boolean }> = (
     };
   }, [end, duration, showBalances]);
 
-  if (!showBalances) return <>•••••</>;
+  if (!showBalances) return <>••••••</>;
   return <>{count.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</>;
 };
 
@@ -116,7 +116,8 @@ const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, a
           background: 'hsla(var(--foreground), 0.02)', 
           border: '1px solid var(--border)',
           borderRadius: '1.25rem'
-        }}>\n          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <h3 style={{ opacity: 0.3, fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', margin: 0 }}>Investment Portfolio</h3>
             <div style={{ color: 'hsl(var(--success))', fontSize: '0.85rem', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <span style={{ position: 'relative', top: '1px' }}>↑</span> 12.8%

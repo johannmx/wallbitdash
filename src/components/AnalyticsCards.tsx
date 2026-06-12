@@ -161,14 +161,14 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
     return Object.entries(monthlyARS)
       .map(([key, amount]) => {
         const [year, monthIdx] = key.split('-');
-        return {
+        return { 
           name: `${monthsNames[parseInt(monthIdx)]} ${year.slice(2)}`,
           amount: parseFloat(amount.toFixed(2)),
           fullKey: key
         };
       })
       .sort((a,b) => a.fullKey.localeCompare(b.fullKey))
-      .slice(-6);
+      .slice(-6); 
   }, [transactions]);
 
   // Calculate total in USD for the chart period
