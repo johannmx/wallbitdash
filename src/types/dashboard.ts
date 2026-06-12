@@ -26,7 +26,7 @@ export interface RecentExpensesData {
 
 export interface DashboardData {
   checking: { balance: string; currency: string };
-  stocks: { balance: string; currency: string; assets: any[] };
+  stocks: { balance: string; currency: string; assets: unknown[] };
   recentExpenses: RecentExpensesData;
   transactions: Transaction[];
   arsRate?: number;
