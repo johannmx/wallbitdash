@@ -18,7 +18,8 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
       flexDirection: 'column',
       gap: '2.5rem',
       flexShrink: 0
-    }}>\n      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <div className="glass" style={{ 
           width: '48px', 
           height: '48px', 
@@ -65,7 +66,7 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
         ))}
       </nav>
 
-      <div style={{ opacity: 0.3, fontSize: '0.7rem', fontWeight: 800, textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+      <div style={{ opacity: 0.3, fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
         @johannmx
       </div>
     </aside>

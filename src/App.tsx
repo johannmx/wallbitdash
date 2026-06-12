@@ -124,17 +124,20 @@ function App() {
         alignItems: 'center', 
         justifyContent: 'center',
         padding: '2rem'
-      }}>\n        <div className="glass animate-in" style={{ 
+      }}>
+        <div className="glass animate-in" style={{ 
           maxWidth: '400px', 
           width: '100%', 
           padding: '3rem', 
           textAlign: 'center',
           borderRadius: '2rem'
-        }}>\n          <div className="gradient-text" style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>🔒</div>
+        }}>
+          <div className="gradient-text" style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>🔒</div>
           <h2 style={{ marginBottom: '1rem' }}>Backend Protegido</h2>
           <p style={{ opacity: 0.6, marginBottom: '2rem', fontSize: '0.9rem' }}>
             Este dashboard está configurado con seguridad. Por favor ingresa tu <b>DASHBOARD_TOKEN</b> para continuar.
-          </p>\n          <input 
+          </p>
+          <input 
             type="password" 
             placeholder="Ingresa tu token aquí..."
             value={tokenInput}
@@ -185,7 +188,8 @@ function App() {
             <h1 style={{ fontSize: 'clamp(2rem, 6vw, 3.5rem)', margin: 0, fontWeight: 900, lineHeight: 1, letterSpacing: '-0.04em' }}>
               Hola, <span className="gradient-text">Johann</span>
             </h1>
-            <p style={{ opacity: 0.3, fontSize: '0.8rem', fontWeight: 800, marginTop: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>wallbit personal dashboard</p>\n          </div>
+            <p style={{ opacity: 0.3, fontSize: '0.8rem', fontWeight: 800, marginTop: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>wallbit personal dashboard</p>
+          </div>
         </div>
         
         <div className="glass header-actions" style={{ 
@@ -193,8 +197,10 @@ function App() {
           gap: '0.75rem', 
           alignItems: 'center', 
           padding: '0.5rem 0.75rem', 
-          borderRadius: '1.25rem',\n          flexShrink: 0
-        }}>\n          {/* Action Group */}
+          borderRadius: '1.25rem',
+          flexShrink: 0
+        }}>
+          {/* Action Group */}
           <div style={{ display: 'flex', gap: '0.25rem', paddingRight: '0.75rem', borderRight: '1px solid var(--border)' }}>
             <button 
               onClick={() => setShowBalances(!showBalances)}
@@ -205,14 +211,16 @@ function App() {
                 color: showBalances ? 'inherit' : 'white',
               }}
               title={showBalances ? "Ocultar saldos" : "Mostrar saldos"}
-            >\n              {showBalances ? <Eye size={16} /> : <EyeOff size={16} />}
+            >
+              {showBalances ? <Eye size={16} /> : <EyeOff size={16} />}
             </button>
             
             <button 
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="theme-btn"
               title="Cambiar tema"
-            >\n              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            >
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
             </button>
           </div>
 
@@ -248,10 +256,12 @@ function App() {
       <footer style={{ marginTop: '6rem', opacity: 0.2, textAlign: 'center', fontSize: '0.75rem', paddingBottom: '3rem' }}>
         <p>Wallbit Dashboard • {new Date().getFullYear()}</p>
         {data._cacheInfo && (
-          <p style={{ marginTop: '0.25rem' }}>Full Sync: {new Date(data._cacheInfo.lastUpdated).toLocaleTimeString()}</p>\n        )}
+          <p style={{ marginTop: '0.25rem' }}>Full Sync: {new Date(data._cacheInfo.lastUpdated).toLocaleTimeString()}</p>
+        )}
       </footer>
 
-      </main>\n      <BottomNav activeSection={activeSection} onSectionChange={setActiveSection} />
+      </main>
+      <BottomNav activeSection={activeSection} onSectionChange={setActiveSection} />
       <style>{`
         .theme-btn {
           width: 36px;
@@ -265,14 +275,19 @@ function App() {
           cursor: pointer;
           color: hsl(var(--foreground));
           opacity: 0.5;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);\n        }
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
         .theme-btn:hover {
           opacity: 1;
-          background: hsla(255, 255, 255, 0.05);\n        }
+          background: hsla(255, 255, 255, 0.05);
+        }
         .theme-btn.active {
           opacity: 1;
           background: hsl(var(--primary));
-          color: white;\n          box-shadow: 0 4px 15px -3px hsla(var(--primary), 0.5);\n        }\n      `}</style>
+          color: white;
+          box-shadow: 0 4px 15px -3px hsla(var(--primary), 0.5);
+        }
+      `}</style>
     </div>
   );
 }
