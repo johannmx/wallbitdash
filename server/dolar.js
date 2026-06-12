@@ -17,6 +17,14 @@ export const fetchWallbitRate = async (apiKey, fetchImpl = fetch) => {
 
 // Legacy export kept for backwards compatibility with existing dolar.test.js
 export const fetchDolarRate = async (fetchImpl = fetch) => {
-  const { rate } = await fetchWallbitRate(null, fetchImpl);
-  return rate;
+  try {
+    const res = await fetchImpl('https://dolarapi.com/v1/dolares/oficial');
+    if (res.ok) {
+      const json = await res.json();
+      return json.venta;
+    }
+  } catch (e) {
+    console.warn('⚠️ Wallbit rates endpoint failed, using fallback.');
+  }
+  return 1000;
 };
