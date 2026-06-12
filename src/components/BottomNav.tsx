@@ -1,4 +1,4 @@
-import { SECTIONS } from './Sidebar';
+import { SECTIONS } from './sections';
 
 interface BottomNavProps {
   activeSection: string;
@@ -25,8 +25,7 @@ export default function BottomNav({ activeSection, onSectionChange }: BottomNavP
         WebkitBackdropFilter: 'blur(20px)',
         background: 'var(--glass-bg)'
       }}
-    >
-      {SECTIONS.map(({ id, label, icon: Icon }) => (
+    >\n      {SECTIONS.map(({ id, label, icon: Icon }) => (
         <button
           key={id}
           onClick={() => onSectionChange(id)}

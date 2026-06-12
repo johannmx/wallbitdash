@@ -1,11 +1,4 @@
-import { Wallet, CreditCard, Activity, ArrowRightLeft } from 'lucide-react';
-
-export const SECTIONS = [
-  { id: 'saldos', label: 'Saldos', icon: Wallet },
-  { id: 'gastos', label: 'Gastos', icon: CreditCard },
-  { id: 'analisis', label: 'Análisis', icon: Activity },
-  { id: 'transacciones', label: 'Historial', icon: ArrowRightLeft },
-];
+import { SECTIONS } from './sections';
 
 interface SidebarProps {
   activeSection: string;
@@ -25,8 +18,7 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
       flexDirection: 'column',
       gap: '2.5rem',
       flexShrink: 0
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+    }}>\n      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <div className="glass" style={{ 
           width: '48px', 
           height: '48px', 
