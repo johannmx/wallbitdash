@@ -1,9 +1,9 @@
 import type { FC } from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 
 interface RefreshTimerProps {
-  onRefresh: () => Promise<any>;
+  onRefresh: () => Promise<unknown>;
 }
 
 const RefreshTimer: FC<RefreshTimerProps> = ({ onRefresh }) => {
@@ -14,31 +14,34 @@ const RefreshTimer: FC<RefreshTimerProps> = ({ onRefresh }) => {
   const TOTAL_TIME = 300;
   const progress = ((TOTAL_TIME - timeLeft) / TOTAL_TIME) * 100;
 
-  useEffect(() => {
-    if (timeLeft <= 0) {
-      handleLocalRefresh();
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setTimeLeft(prev => prev - 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [timeLeft]);
-
-  const handleLocalRefresh = async () => {
+  const handleLocalRefresh = useCallback(async () => {
     setIsRefreshing(true);
     setErrorStatus(null);
     try {
       if (onRefresh) await onRefresh();
       setTimeLeft(300);
-    } catch (e: any) {
-      setErrorStatus({ code: e.code || 'UNKNOWN', status: e.status || 500 });
+    } catch (e) {
+      const err = e as { code?: string; status?: number };
+      setErrorStatus({ code: err.code || 'UNKNOWN', status: err.status || 500 });
     } finally {
       setIsRefreshing(false);
     }
-  };
+  }, [onRefresh]);
+
+  // Tick every second, independently of timeLeft
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Trigger refresh when timer reaches 0
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      handleLocalRefresh();
+    }
+  }, [timeLeft, handleLocalRefresh]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -54,8 +57,7 @@ const RefreshTimer: FC<RefreshTimerProps> = ({ onRefresh }) => {
       alignItems: 'center', 
       gap: '1rem',
       minWidth: 'min(240px, 100%)'
-    }}>
-      {/* Visual Progress Bar Section (Integrated into the capsule) */}
+    }}>\n      {/* Visual Progress Bar Section (Integrated into the capsule) */}
       <div className="timer-progress-section" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.2rem', paddingLeft: '0.75rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem', fontSize: '0.6rem', fontWeight: 800, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
           <span className="sync-label">Sync</span>
@@ -70,11 +72,8 @@ const RefreshTimer: FC<RefreshTimerProps> = ({ onRefresh }) => {
         }}>
           <div style={{ 
             height: '100%', 
-            width: `${progress}%`, 
-            background: 'linear-gradient(90deg, hsl(var(--primary)), #818cf8)',
-            borderRadius: '10px',
-            transition: 'width 1s linear',
-          }} />
+            width: `${progress}%`,\n            background: 'linear-gradient(90deg, hsl(var(--primary)), #818cf8)',
+            borderRadius: '10px',\n            transition: 'width 1s linear',\n          }} />
         </div>
       </div>
 

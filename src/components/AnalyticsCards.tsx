@@ -114,9 +114,19 @@ const styles: Record<string, CSSProperties> = {
 
 const COLORS = ['#6366f1', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#0ea5e9'];
 
+interface ActiveShapeProps {
+  cx: number;
+  cy: number;
+  innerRadius: number;
+  outerRadius: number;
+  startAngle: number;
+  endAngle: number;
+  fill: string;
+}
+
 // Active shape for Pie Chart zoom effect
-const renderActiveShape = (props: any) => {
-  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
+const renderActiveShape = (props: unknown) => {
+  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props as ActiveShapeProps;
   return (
     <g>
       <Sector
@@ -151,14 +161,14 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
     return Object.entries(monthlyARS)
       .map(([key, amount]) => {
         const [year, monthIdx] = key.split('-');
-        return { 
+        return {
           name: `${monthsNames[parseInt(monthIdx)]} ${year.slice(2)}`,
           amount: parseFloat(amount.toFixed(2)),
           fullKey: key
         };
       })
       .sort((a,b) => a.fullKey.localeCompare(b.fullKey))
-      .slice(-6); 
+      .slice(-6);
   }, [transactions]);
 
   // Calculate total in USD for the chart period
@@ -187,7 +197,7 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
     }
 
     return Object.entries(breakdown)
-      .filter(([_, value]) => value > 0)
+      .filter(([, value]) => value > 0)
       .map(([name, value]) => ({ 
         name, 
         value: parseFloat(value.toFixed(2)) 
@@ -198,7 +208,7 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
     return expenseBreakdown.reduce((acc, curr) => acc + curr.value, 0).toFixed(2);
   }, [expenseBreakdown]);
 
-  const onPieEnter = (_: any, index: number) => {
+  const onPieEnter = (_unknown: unknown, index: number) => {
     setActiveIndex(index);
   };
 
@@ -277,19 +287,17 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                {...({
-                  activeIndex,
-                  activeShape: renderActiveShape,
-                  data: expenseBreakdown,
-                  cx: "50%",
-                  cy: "50%",
-                  innerRadius: 55,
-                  outerRadius: 75,
-                  paddingAngle: 5,
-                  dataKey: "value",
-                  onMouseEnter: onPieEnter,
-                  onMouseLeave: onPieLeave
-                } as any)}
+                activeIndex={activeIndex}
+                activeShape={renderActiveShape}
+                data={expenseBreakdown}
+                cx="50%"
+                cy="50%"
+                innerRadius={55}
+                outerRadius={75}
+                paddingAngle={5}
+                dataKey="value"
+                onMouseEnter={onPieEnter}
+                onMouseLeave={onPieLeave}
               >
                 {expenseBreakdown.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="var(--background)" strokeWidth={2} />
