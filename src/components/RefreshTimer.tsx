@@ -39,6 +39,7 @@ const RefreshTimer: FC<RefreshTimerProps> = ({ onRefresh }) => {
   // Trigger refresh when timer reaches 0
   useEffect(() => {
     if (timeLeft <= 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       handleLocalRefresh();
     }
   }, [timeLeft, handleLocalRefresh]);
