@@ -10,12 +10,12 @@ const testAuth = (envToken, headerToken) => {
     }
     const token = req.headers['x-dashboard-token'];
     if (!token || typeof token !== 'string') {
-      console.warn(`🔒 Audit: Failed authentication attempt (No token) from IP: ${req.ip || 'Unknown'}`);
+      console.warn(`🔒 Audit: Failed authentication attempt (No token) from IP: ${String(req.ip || 'Unknown').replace(/[\r\n]/g, '')}`);
       return res.status(401).json({ error: 'Unauthorized: Invalid token' });
     }
 
     if (token.length > 256) {
-      console.warn(`🔒 Audit: Failed authentication attempt (Token too long) from IP: ${req.ip || 'Unknown'}`);
+      console.warn(`🔒 Audit: Failed authentication attempt (Token too long) from IP: ${String(req.ip || 'Unknown').replace(/[\r\n]/g, '')}`);
       return res.status(401).json({ error: 'Unauthorized: Invalid token' });
     }
 
@@ -30,7 +30,7 @@ const testAuth = (envToken, headerToken) => {
       console.error('Auth verification error:', error);
     }
 
-    console.warn(`🔒 Audit: Failed authentication attempt (Invalid token) from IP: ${req.ip || 'Unknown'}`);
+    console.warn(`🔒 Audit: Failed authentication attempt (Invalid token) from IP: ${String(req.ip || 'Unknown').replace(/[\r\n]/g, '')}`);
     return res.status(401).json({ error: 'Unauthorized: Invalid token' });
   };
 
