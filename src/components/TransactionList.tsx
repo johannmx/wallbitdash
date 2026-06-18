@@ -8,15 +8,30 @@ interface TransactionListProps {
 
 const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [sortField, setSortField] = useState<keyof Transaction>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => {
+    return typeof window !== 'undefined' ? window.matchMedia('(max-width: 639px)').matches : false;
+  });
 
+  // Performance Optimization: Debounce search input to avoid heavy filtering/sorting computations on every keystroke
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 640);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 200);
+    return () => clearTimeout(handler);
+  }, [search]);
+
+  // Performance Optimization: Use window.matchMedia instead of resize event listener to avoid rendering/evaluating on every pixel resize
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 639px)');
+    const handleMediaQueryChange = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches);
+    };
+    
+    mediaQuery.addEventListener('change', handleMediaQueryChange);
+    return () => mediaQuery.removeEventListener('change', handleMediaQueryChange);
   }, []);
 
   const isExpense = (type: string) => {
@@ -27,9 +42,9 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
   const filteredTransactions = useMemo(() => {
     let txs = [...transactions];
     
-    // Search filter
-    if (search) {
-      const s = search.toLowerCase();
+    // Search filter using debounced term
+    if (debouncedSearch) {
+      const s = debouncedSearch.toLowerCase();
       txs = txs.filter(t => 
         t.type.toLowerCase().includes(s) || 
         t.amount.includes(s) || 
@@ -55,7 +70,7 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
     });
 
     return txs; 
-  }, [search, sortField, sortOrder, transactions]);
+  }, [debouncedSearch, sortField, sortOrder, transactions]);
 
   const handleSort = (field: keyof Transaction) => {
     if (sortField === field) {
@@ -290,7 +305,7 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
         th:hover {
           color: hsl(var(--primary)) !important;
           opacity: 1 !important;
-        }
+          }
         /* Keep lateral scrollable behavior */
         .scroll-area::-webkit-scrollbar {
           width: 8px;
