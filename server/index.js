@@ -77,12 +77,12 @@ app.use(express.json({ limit: '10kb' }));
 // Catch malformed JSON payloads specifically to prevent stack trace leaks
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    console.warn(`🔒 Audit: Malformed JSON payload from IP: ${req.ip || 'Unknown'}`);
+    console.warn(`🔒 Audit: Malformed JSON payload from IP: ${String(req.ip || 'Unknown').replace(/[\r\n]/g, '')}`);
     return res.status(400).json({ error: 'Bad Request: Malformed JSON payload' });
   }
   // Security Enhancement: Handle Payload Too Large errors gracefully to prevent stack trace leaks
   if (err.type === 'entity.too.large') {
-    console.warn(`🔒 Audit: Payload Too Large from IP: ${req.ip || 'Unknown'}`);
+    console.warn(`🔒 Audit: Payload Too Large from IP: ${String(req.ip || 'Unknown').replace(/[\r\n]/g, '')}`);
     return res.status(413).json({ error: 'Payload Too Large' });
   }
   next(err);
@@ -98,12 +98,12 @@ const authMiddleware = (req, res, next) => {
 
   // Security Enhancement: Input validation & length limit to prevent DoS via large payload hashing
   if (!token || typeof token !== 'string') {
-    console.warn(`🔒 Audit: Failed authentication attempt (No token) from IP: ${req.ip || 'Unknown'}`);
+    console.warn(`🔒 Audit: Failed authentication attempt (No token) from IP: ${String(req.ip || 'Unknown').replace(/[\r\n]/g, '')}`);
     return res.status(401).json({ error: 'Unauthorized: Invalid token' });
   }
 
   if (token.length > 256) {
-    console.warn(`🔒 Audit: Failed authentication attempt (Token too long) from IP: ${req.ip || 'Unknown'}`);
+    console.warn(`🔒 Audit: Failed authentication attempt (Token too long) from IP: ${String(req.ip || 'Unknown').replace(/[\r\n]/g, '')}`);
     return res.status(401).json({ error: 'Unauthorized: Invalid token' });
   }
 
@@ -120,7 +120,7 @@ const authMiddleware = (req, res, next) => {
     console.error('Auth verification error:', error);
   }
 
-  console.warn(`🔒 Audit: Failed authentication attempt (Invalid token) from IP: ${req.ip || 'Unknown'}`);
+  console.warn(`🔒 Audit: Failed authentication attempt (Invalid token) from IP: ${String(req.ip || 'Unknown').replace(/[\r\n]/g, '')}`);
   return res.status(401).json({ error: 'Unauthorized: Invalid token' });
 };
 
@@ -312,7 +312,7 @@ app.get('/api/dashboard', dashboardLimiter, authMiddleware, (req, res) => {
 // Security Enhancement: Catch-all 404 handler to prevent Express from leaking framework details via default HTML responses
 app.use((req, res) => {
   const safeUrl = String(req.originalUrl).replace(/[\r\n]/g, '');
-  console.warn(`🔒 Audit: 404 Not Found on ${req.method} ${safeUrl} from IP: ${req.ip || 'Unknown'}`);
+  console.warn(`🔒 Audit: 404 Not Found on ${req.method} ${safeUrl} from IP: ${String(req.ip || 'Unknown').replace(/[\r\n]/g, '')}`);
   res.status(404).json({ error: 'Not Found' });
 });
 
