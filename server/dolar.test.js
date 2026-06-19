@@ -3,8 +3,9 @@ import assert from 'node:assert';
 import { fetchDolarRate } from './dolar.js';
 
 test('fetchDolarRate returns venta value on success', async (t) => {
-  const mockFetch = async (url) => {
+  const mockFetch = async (url, options) => {
     assert.strictEqual(url, 'https://dolarapi.com/v1/dolares/oficial');
+    assert.ok(options?.signal, 'AbortSignal should be passed as signal option');
     return {
       ok: true,
       json: async () => ({ venta: 1234.56 })

@@ -18,7 +18,9 @@ export const fetchWallbitRate = async (apiKey, fetchImpl = fetch) => {
 // Legacy export kept for backwards compatibility with existing dolar.test.js
 export const fetchDolarRate = async (fetchImpl = fetch) => {
   try {
-    const res = await fetchImpl('https://dolarapi.com/v1/dolares/oficial');
+    const res = await fetchImpl('https://dolarapi.com/v1/dolares/oficial', {
+      signal: AbortSignal.timeout(5000)
+    });
     if (res.ok) {
       const json = await res.json();
       return json.venta;
