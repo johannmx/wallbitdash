@@ -16,4 +16,5 @@ declare module 'lucide-react' {
   export const AlertCircle: Icon;
   export const DollarSign: Icon;
   export const PieChart: Icon;
+  export const Lock: Icon;
 }
