@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sun, Moon, Eye, EyeOff } from 'lucide-react';
+import { Sun, Moon, Eye, EyeOff, Lock } from 'lucide-react';
 import BalanceCards from './components/BalanceCards';
 import TransactionList from './components/TransactionList';
 import RecentExpenses from './components/RecentExpenses';
@@ -95,6 +95,13 @@ function App() {
       setIsLocked(false);
       fetchDashboard();
     }
+  };
+
+  const handleLock = () => {
+    // 🛡️ Sentinel: Securely lock session by clearing token from sessionStorage
+    sessionStorage.removeItem('dashboard_token');
+    setIsLocked(true);
+    setTokenInput('');
   };
 
   const handleRefresh = async () => {
@@ -222,6 +229,14 @@ function App() {
               title="Cambiar tema"
             >
               {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+
+            <button 
+              onClick={handleLock}
+              className="theme-btn"
+              title="Bloquear dashboard"
+            >
+              <Lock size={16} />
             </button>
           </div>
 
