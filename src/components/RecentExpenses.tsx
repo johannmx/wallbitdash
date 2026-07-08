@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import type { RecentExpensesData } from '../types/dashboard';
+import { formatDateSpanish } from '../utils/date';
 
 interface RecentExpensesProps {
   data: RecentExpensesData;
@@ -65,11 +66,11 @@ const RecentExpenses: FC<RecentExpensesProps> = ({ data, arsRate }) => {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                     <span style={{ opacity: 0.4, fontSize: '0.75rem', fontWeight: 500 }}>
-                      {new Date(tx.date + 'T00:00:00Z').toLocaleDateString('es-ES')}
+                      {formatDateSpanish(tx.date)}
                     </span>
                     {tx.status === 'PENDING' && (
                       <span style={{ 
-                        fontSize: '0.6rem', 
+                        fontSize: '0.65rem', 
                         padding: '0.2rem 0.5rem', 
                         borderRadius: '0.4rem', 
                         background: 'hsla(var(--warning), 0.15)', 

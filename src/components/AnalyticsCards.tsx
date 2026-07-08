@@ -152,9 +152,15 @@ const AnalyticsCards: FC<AnalyticsCardsProps> = ({ transactions, arsRate }) => {
     
     for (const tx of transactions) {
       if (tx.status === 'COMPLETED' && tx.type.toLowerCase().includes('deposit_local')) {
-        const d = new Date(tx.date + 'T00:00:00Z');
-        const monthKey = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`;
-        monthlyARS[monthKey] = (monthlyARS[monthKey] || 0) + parseFloat(tx.amount);
+        const parts = tx.date.split('-');
+        if (parts.length === 3) {
+          const year = parts[0];
+          const monthIdx = parseInt(parts[1], 10) - 1;
+          if (!isNaN(monthIdx)) {
+            const monthKey = `${year}-${String(monthIdx).padStart(2, '0')}`;
+            monthlyARS[monthKey] = (monthlyARS[monthKey] || 0) + parseFloat(tx.amount);
+          }
+        }
       }
     }
 
