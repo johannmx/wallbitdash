@@ -30,6 +30,7 @@ export interface DashboardData {
   recentExpenses: RecentExpensesData;
   transactions: Transaction[];
   arsRate?: number;
+  arsBuyRate?: number;
   arsRateUpdatedAt?: string;
   _cacheInfo?: { lastUpdated: string };
 }

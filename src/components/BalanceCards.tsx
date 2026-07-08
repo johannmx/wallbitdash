@@ -41,10 +41,11 @@ interface BalanceCardsProps {
   stocks: { balance: string; currency: string };
   showBalances: boolean;
   arsRate: number;
+  arsBuyRate?: number;
   arsRateUpdatedAt?: string;
 }
 
-const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, arsRate, arsRateUpdatedAt }) => {
+const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, arsRate, arsBuyRate, arsRateUpdatedAt }) => {
   return (
     <>
       <div className="dashboard-grid" style={{ gap: 'var(--space-group)' }}>
@@ -82,11 +83,26 @@ const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, a
           }} />
 
           <div style={{ position: 'relative', zIndex: 1 }}>
+            {/* Rates Pills Above Title */}
+            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <div className="rate-pill-small">
+                <span className="rate-label">Depositar pesos:</span>
+                <span className="rate-value">1 USD = {(arsBuyRate || 1000).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ARS</span>
+              </div>
+              <div className="rate-pill-small">
+                <span className="rate-label">Retirar pesos:</span>
+                <span className="rate-value">1 USD = {arsRate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ARS</span>
+              </div>
+              {arsRateUpdatedAt && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.65rem', opacity: 0.4, fontWeight: 700, marginLeft: 'auto' }}>
+                  <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'hsl(var(--success))', display: 'inline-block', animation: 'pulse-dot 2s infinite' }} />
+                  <span>WALLBIT RATE • {new Date(arsRateUpdatedAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+              )}
+            </div>
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <h3 style={{ opacity: 0.3, fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', margin: 0 }}>Available Capital</h3>
-              <div style={{ color: 'hsl(var(--success))', fontSize: '0.9rem', fontWeight: 800, fontFamily: "'JetBrains Mono', monospace", display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <span style={{ position: 'relative', top: '1px' }}>↑</span> 2.4% <span style={{ opacity: 0.3, color: 'hsl(var(--foreground))', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.05em' }}>TRENDING</span>
-              </div>
             </div>
             
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -99,11 +115,6 @@ const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, a
             <div style={{ marginTop: '2.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
               <div className="ars-pill-hero">
                 VALUE IN ARS <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>{showBalances ? <CountUp end={parseFloat(checking.balance) * arsRate} duration={2000} showBalances={showBalances} /> : '••••'}</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.7rem', opacity: 0.4, fontWeight: 700 }}>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", color: 'hsl(var(--primary))', opacity: 1, fontWeight: 800, fontSize: '0.75rem' }}>1 USD = {arsRate.toLocaleString('es-AR')} ARS</span>
-                <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'hsl(var(--success))', display: 'inline-block', animation: 'pulse-dot 2s infinite' }} />
-                <span>WALLBIT RATE{arsRateUpdatedAt ? ` • ${new Date(arsRateUpdatedAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}` : ''}</span>
               </div>
             </div>
           </div>
@@ -120,7 +131,7 @@ const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, a
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <h3 style={{ opacity: 0.3, fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', margin: 0 }}>Investment Portfolio</h3>
             <div style={{ color: 'hsl(var(--success))', fontSize: '0.85rem', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span style={{ position: 'relative', top: '1px' }}>↑</span> 12.8%
+              2.50% APY
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -129,13 +140,35 @@ const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, a
             </span>
             <span style={{ opacity: 0.2, fontWeight: 700 }}>{stocks.currency}</span>
             <div className="ars-pill" style={{ marginLeft: 'auto', background: 'transparent', border: 'none', boxShadow: 'none' }}>
-               <span style={{ opacity: 0.3, fontWeight: 800, fontSize: '0.65rem', marginRight: '0.5rem' }}>ARS EQ.</span>
+               <span style={{ opacity: 0.3, fontWeight: 800, fontSize: '0.65rem', marginRight: '0.5rem' }}>VALUE IN ARS</span>
                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>{showBalances ? (parseFloat(stocks.balance) * arsRate).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '••••'}</span>
             </div>
           </div>
         </div>
       </div>
       <style>{`
+        .rate-pill-small {
+          background: hsla(var(--foreground), 0.03);
+          padding: 0.4rem 0.8rem;
+          border-radius: 0.75rem;
+          font-size: 0.75rem;
+          font-weight: 700;
+          border: 1px solid var(--border);
+          display: flex;
+          gap: 0.5rem;
+          align-items: center;
+        }
+        .rate-pill-small .rate-label {
+          opacity: 0.4;
+          font-weight: 800;
+          text-transform: uppercase;
+          font-size: 0.65rem;
+          letter-spacing: 0.05em;
+        }
+        .rate-pill-small .rate-value {
+          color: hsl(var(--primary));
+          font-family: 'JetBrains Mono', monospace;
+        }
         .ars-pill {
           background: rgba(var(--glass-bg-rgb, 255, 255, 255), 0.05);
           padding: 0.3rem 0.75rem;
