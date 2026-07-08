@@ -21,10 +21,7 @@ export const fetchWallbitRate = async (apiKey, fetchImpl = fetch) => {
     }
     if (resBuy.ok) {
       const json = await resBuy.json();
-      const rawRate = json.data.rate;
-      if (rawRate && rawRate !== 0) {
-        buyRate = 1 / rawRate;
-      }
+      buyRate = json.data.rate;
     }
     return { rate, buyRate, updatedAt };
   } catch (e) {

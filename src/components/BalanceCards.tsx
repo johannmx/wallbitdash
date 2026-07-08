@@ -48,6 +48,36 @@ interface BalanceCardsProps {
 const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, arsRate, arsBuyRate, arsRateUpdatedAt }) => {
   return (
     <>
+      {/* Rates Info Ribbon (Cinta informativa) */}
+      <div className="rates-ribbon" style={{ 
+        display: 'flex', 
+        gap: '0.75rem', 
+        marginBottom: '1.5rem', 
+        flexWrap: 'wrap', 
+        alignItems: 'center',
+        padding: '0.6rem 1.2rem',
+        borderRadius: '1rem',
+        background: 'hsla(var(--foreground), 0.02)',
+        border: '1px solid var(--border)',
+        backdropFilter: 'blur(8px)'
+      }}>
+        <div className="rate-pill-small" style={{ background: 'transparent', border: 'none', padding: 0 }}>
+          <span className="rate-label">Depositar pesos:</span>
+          <span className="rate-value">1 USD = {(arsBuyRate || 1000).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ARS</span>
+        </div>
+        <div style={{ width: '1px', height: '12px', background: 'var(--border)', display: 'inline-block' }} className="hide-mobile" />
+        <div className="rate-pill-small" style={{ background: 'transparent', border: 'none', padding: 0 }}>
+          <span className="rate-label">Retirar pesos:</span>
+          <span className="rate-value">1 USD = {arsRate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ARS</span>
+        </div>
+        {arsRateUpdatedAt && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.65rem', opacity: 0.4, fontWeight: 700, marginLeft: 'auto' }} className="hide-mobile-meta">
+            <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'hsl(var(--success))', display: 'inline-block', animation: 'pulse-dot 2s infinite' }} />
+            <span>WALLBIT RATE • {new Date(arsRateUpdatedAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</span>
+          </div>
+        )}
+      </div>
+
       <div className="dashboard-grid" style={{ gap: 'var(--space-group)' }}>
         {/* Checking Balance (Hero Focus) */}
         <div className="glass stagger-2" style={{ 
@@ -83,24 +113,6 @@ const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, a
           }} />
 
           <div style={{ position: 'relative', zIndex: 1 }}>
-            {/* Rates Pills Above Title */}
-            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-              <div className="rate-pill-small">
-                <span className="rate-label">Depositar pesos:</span>
-                <span className="rate-value">1 USD = {(arsBuyRate || 1000).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ARS</span>
-              </div>
-              <div className="rate-pill-small">
-                <span className="rate-label">Retirar pesos:</span>
-                <span className="rate-value">1 USD = {arsRate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ARS</span>
-              </div>
-              {arsRateUpdatedAt && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.65rem', opacity: 0.4, fontWeight: 700, marginLeft: 'auto' }}>
-                  <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'hsl(var(--success))', display: 'inline-block', animation: 'pulse-dot 2s infinite' }} />
-                  <span>WALLBIT RATE • {new Date(arsRateUpdatedAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</span>
-                </div>
-              )}
-            </div>
-
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <h3 style={{ opacity: 0.3, fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', margin: 0 }}>Available Capital</h3>
             </div>
@@ -205,6 +217,19 @@ const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, a
           font-size: 1.1rem;
         }
         @media (max-width: 640px) {
+          .rates-ribbon {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 0.5rem !important;
+            padding: 0.8rem 1rem !important;
+          }
+          .hide-mobile {
+            display: none !important;
+          }
+          .hide-mobile-meta {
+            margin-left: 0 !important;
+            margin-top: 0.25rem;
+          }
           .ars-pill { margin-left: 0; margin-top: 0.5rem; width: 100%; justify-content: center; }
           .ars-pill-hero { width: 100%; justify-content: center; }
         }
