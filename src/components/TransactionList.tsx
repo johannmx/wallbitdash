@@ -1,6 +1,7 @@
 import { type FC, useState, useMemo, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import type { Transaction } from '../types/dashboard';
+import { formatDateSpanish } from '../utils/date';
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -8,30 +9,15 @@ interface TransactionListProps {
 
 const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
   const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [sortField, setSortField] = useState<keyof Transaction>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [isMobile, setIsMobile] = useState(() => {
-    return typeof window !== 'undefined' ? window.matchMedia('(max-width: 639px)').matches : false;
-  });
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Performance Optimization: Debounce search input to avoid heavy filtering/sorting computations on every keystroke
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(search);
-    }, 200);
-    return () => clearTimeout(handler);
-  }, [search]);
-
-  // Performance Optimization: Use window.matchMedia instead of resize event listener to avoid rendering/evaluating on every pixel resize
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 639px)');
-    const handleMediaQueryChange = (e: MediaQueryListEvent) => {
-      setIsMobile(e.matches);
-    };
-    
-    mediaQuery.addEventListener('change', handleMediaQueryChange);
-    return () => mediaQuery.removeEventListener('change', handleMediaQueryChange);
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const isExpense = (type: string) => {
@@ -42,9 +28,9 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
   const filteredTransactions = useMemo(() => {
     let txs = [...transactions];
     
-    // Search filter using debounced term
-    if (debouncedSearch) {
-      const s = debouncedSearch.toLowerCase();
+    // Search filter
+    if (search) {
+      const s = search.toLowerCase();
       txs = txs.filter(t => 
         t.type.toLowerCase().includes(s) || 
         t.amount.includes(s) || 
@@ -70,7 +56,7 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
     });
 
     return txs; 
-  }, [debouncedSearch, sortField, sortOrder, transactions]);
+  }, [search, sortField, sortOrder, transactions]);
 
   const handleSort = (field: keyof Transaction) => {
     if (sortField === field) {
@@ -180,7 +166,7 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
                 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', maxWidth: '60%' }}>
                     <div style={{ fontSize: '0.7rem', opacity: 0.5 }}>
-                        {new Date(tx.date + 'T00:00:00Z').toLocaleDateString('es-ES')}
+                        {formatDateSpanish(tx.date)}
                     </div>
                     <div style={{ fontSize: '0.9rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {tx.description || tx.type.replace(/_/g, ' ')}
@@ -233,7 +219,7 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
                     transition: 'all 0.2s var(--ease-out-expo)'
                   }}>
                     <td style={{ padding: '1.5rem 1rem', fontSize: '0.8rem', fontWeight: 700, opacity: 0.3, fontFamily: "'JetBrains Mono', monospace" }}>
-                      {new Date(tx.date + 'T00:00:00Z').toLocaleDateString('es-ES')}
+                      {formatDateSpanish(tx.date)}
                     </td>
                     <td style={{ fontSize: '1rem', fontWeight: 800, maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: "'Outfit', sans-serif" }}>
                       {tx.description || '-'}
@@ -305,7 +291,7 @@ const TransactionList: FC<TransactionListProps> = ({ transactions }) => {
         th:hover {
           color: hsl(var(--primary)) !important;
           opacity: 1 !important;
-          }
+        }
         /* Keep lateral scrollable behavior */
         .scroll-area::-webkit-scrollbar {
           width: 8px;
