@@ -27,8 +27,8 @@ const dataTemplate = {
   transactions: []
 };
 
-const app = express();
-app.set('trust proxy', 1);
+const appInstance = express();
+appInstance.set('trust proxy', 1);
 const PORT = 3001;
 const DATA_PATH = process.env.DATA_PATH || path.join(__dirname, '../data/data.json');
 const API_KEY = process.env.WALLBIT_API_KEY;
@@ -42,7 +42,7 @@ if (!DASHBOARD_TOKEN) {
 }
 
 // Security Middlewares
-app.use(helmet());
+appInstance.use(helmet());
 
 // Security Enhancement: Global Rate Limiting to prevent DoS attacks and brute-force scanning
 const globalLimiter = rateLimit({
@@ -52,12 +52,12 @@ const globalLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'Too many requests, please try again later.' }
 });
-app.use(globalLimiter);
+appInstance.use(globalLimiter);
 
 // Security Enhancement: Fail-closed approach for CORS configuration in production
 const defaultOrigins = process.env.NODE_ENV === 'production' ? [] : ['http://localhost:5173'];
 const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : defaultOrigins;
-app.use(cors({
+appInstance.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
@@ -72,10 +72,10 @@ app.use(cors({
 }));
 
 // Security Enhancement: Limit JSON payload size to 10kb to prevent Denial of Service (DoS) attacks
-app.use(express.json({ limit: '10kb' }));
+appInstance.use(express.json({ limit: '10kb' }));
 
 // Catch malformed JSON payloads specifically to prevent stack trace leaks
-app.use((err, req, res, next) => {
+appInstance.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
     console.warn(`🔒 Audit: Malformed JSON payload from IP: ${String(req.ip || 'Unknown').replace(/[\r\n]/g, '')}`);
     return res.status(400).json({ error: 'Bad Request: Malformed JSON payload' });
@@ -211,7 +211,7 @@ const fetchWallbitData = async () => {
   console.log('🔄 Refreshing data from Wallbit API...');
 
   try {
-    const { rate: arsRate, updatedAt: arsRateUpdatedAt } = await fetchWallbitRate(API_KEY);
+    const { rate: arsRate, buyRate: arsBuyRate, updatedAt: arsRateUpdatedAt } = await fetchWallbitRate(API_KEY);
 
     // 1. Fetch Checking Balance
     const checkingRes = await fetchWithTimeout(`${API_BASE}/balance/checking`, { headers });
@@ -267,7 +267,7 @@ const fetchWallbitData = async () => {
     const recentExpenses = mappedTxs.filter(tx => {
        const isExpense = expenseTypes.includes(tx.type.toLowerCase()) || tx.type.toLowerCase().includes('spent');
        return tx.timestamp >= sevenDaysAgoTime && isExpense && (tx.status === 'COMPLETED' || tx.status === 'PENDING');
-    }).sort((a,b) => b.timestamp - a.timestamp);
+     }).sort((a,b) => b.timestamp - a.timestamp);
 
     const totalInUSD = recentExpenses.reduce((sum, tx) => {
       let val = parseFloat(tx.amount);
@@ -277,6 +277,7 @@ const fetchWallbitData = async () => {
 
     // 6. Update Cache
     cache.arsRate = arsRate;
+    cache.arsBuyRate = arsBuyRate;
     cache.arsRateUpdatedAt = arsRateUpdatedAt;
     cache.transactions = mappedTxs;
     cache.recentExpenses = {
@@ -307,7 +308,7 @@ const dashboardLimiter = rateLimit({
   message: { error: 'Too many requests, please try again later.' }
 });
 
-app.get('/api/dashboard', dashboardLimiter, authMiddleware, (req, res) => {
+appInstance.get('/api/dashboard', dashboardLimiter, authMiddleware, (req, res) => {
   // Security Enhancement: Prevent caching of sensitive financial data
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.setHeader('Pragma', 'no-cache');
@@ -324,7 +325,7 @@ app.get('/api/dashboard', dashboardLimiter, authMiddleware, (req, res) => {
 });
 
 // Security Enhancement: Catch-all 404 handler to prevent Express from leaking framework details via default HTML responses
-app.use((req, res) => {
+appInstance.use((req, res) => {
   const safeUrl = String(req.originalUrl).replace(/[\r\n]/g, '');
   console.warn(`🔒 Audit: 404 Not Found on ${req.method} ${safeUrl} from IP: ${String(req.ip || 'Unknown').replace(/[\r\n]/g, '')}`);
   res.status(404).json({ error: 'Not Found' });
@@ -332,7 +333,7 @@ app.use((req, res) => {
 
 // Security Enhancement: Global error handler to prevent stack trace leaks
 // Ensures errors return secure JSON responses instead of exposing internals via HTML
-app.use((err, req, res, next) => {
+appInstance.use((err, req, res, next) => {
   console.error('🚨 Error caught by global handler:', err.message);
 
   if (err.message === 'CORS blocked') {
@@ -343,6 +344,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+appInstance.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Cache Server running at http://0.0.0.0:${PORT}`);
 });

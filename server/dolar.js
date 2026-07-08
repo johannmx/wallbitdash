@@ -1,18 +1,36 @@
 export const fetchWallbitRate = async (apiKey, fetchImpl = fetch) => {
+  let rate = 1000;
+  let buyRate = 1000;
+  let updatedAt = null;
   try {
-    const res = await fetchImpl('https://api.wallbit.io/api/public/v1/rates?source_currency=USD&dest_currency=ARS', {
-      headers: { 'X-API-Key': apiKey },
-      signal: AbortSignal.timeout(5000)
-    });
-    if (res.ok) {
-      const json = await res.json();
-      const { rate, updated_at } = json.data;
-      return { rate, updatedAt: updated_at };
+    const [resSell, resBuy] = await Promise.all([
+      fetchImpl('https://api.wallbit.io/api/public/v1/rates?source_currency=USD&dest_currency=ARS', {
+        headers: { 'X-API-Key': apiKey },
+        signal: AbortSignal.timeout(5000)
+      }),
+      fetchImpl('https://api.wallbit.io/api/public/v1/rates?source_currency=ARS&dest_currency=USD', {
+        headers: { 'X-API-Key': apiKey },
+        signal: AbortSignal.timeout(5000)
+      })
+    ]);
+
+    if (resSell.ok) {
+      const json = await resSell.json();
+      rate = json.data.rate;
+      updatedAt = json.data.updated_at;
     }
+    if (resBuy.ok) {
+      const json = await resBuy.json();
+      const rawRate = json.data.rate;
+      if (rawRate && rawRate !== 0) {
+        buyRate = 1 / rawRate;
+      }
+    }
+    return { rate, buyRate, updatedAt };
   } catch (e) {
     console.warn('⚠️ Wallbit rates endpoint failed, using fallback.');
   }
-  return { rate: 1000, updatedAt: null };
+  return { rate: 1000, buyRate: 1000, updatedAt: null };
 };
 
 // Legacy export kept for backwards compatibility with existing dolar.test.js
