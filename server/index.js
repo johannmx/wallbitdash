@@ -225,7 +225,7 @@ const fetchWallbitData = async () => {
     const stocksRes = await fetchWithTimeout(`${API_BASE}/balance/stocks`, { headers });
     if (stocksRes.ok) {
       const json = await stocksRes.json();
-      const item = (json.data && json.data[0]) || { shares: "0.00", symbol: "USD" };
+      const item = (json.data && json.data.find(asset => asset.symbol === 'USD')) || { shares: "0.00", symbol: "USD" };
       cache.stocks = { 
         balance: item.shares || item.balance || "0.00", 
         currency: item.symbol || item.currency || "USD",
