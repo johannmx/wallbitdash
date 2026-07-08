@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const CountUp: FC<{ end: number, duration?: number, showBalances: boolean }> = ({ end, duration = 1500, showBalances }) => {
   const [count, setCount] = useState(0);
@@ -46,6 +46,42 @@ interface BalanceCardsProps {
 }
 
 const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, arsRate, arsBuyRate, arsRateUpdatedAt }) => {
+  const [trend, setTrend] = useState<{ sell: 'up' | 'down' | 'stable'; buy: 'up' | 'down' | 'stable' }>(() => {
+    const saved = sessionStorage.getItem('wallbit_rates_history');
+    if (saved) {
+      try {
+        const { sell, buy, trendSell, trendBuy } = JSON.parse(saved);
+        if (sell === arsRate && buy === (arsBuyRate || 1000)) {
+          return { sell: trendSell, buy: trendBuy };
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    return { sell: 'stable', buy: 'stable' };
+  });
+
+  const prevRatesRef = useRef<{ sell: number; buy: number }>({ sell: arsRate, buy: arsBuyRate || 1000 });
+
+  useEffect(() => {
+    const prevSell = prevRatesRef.current.sell;
+    const prevBuy = prevRatesRef.current.buy;
+
+    if (arsRate !== prevSell || (arsBuyRate !== undefined && arsBuyRate !== prevBuy)) {
+      const newTrend: { sell: 'up' | 'down' | 'stable'; buy: 'up' | 'down' | 'stable' } = {
+        sell: arsRate > prevSell ? 'up' : arsRate < prevSell ? 'down' : 'stable',
+        buy: arsBuyRate !== undefined ? (arsBuyRate > prevBuy ? 'up' : arsBuyRate < prevBuy ? 'down' : 'stable') : 'stable'
+      };
+      setTrend(newTrend);
+      prevRatesRef.current = { sell: arsRate, buy: arsBuyRate || 1000 };
+      sessionStorage.setItem('wallbit_rates_history', JSON.stringify({
+        sell: arsRate,
+        buy: arsBuyRate || 1000,
+        trendSell: newTrend.sell,
+        trendBuy: newTrend.buy
+      }));
+    }
+  }, [arsRate, arsBuyRate]);
   return (
     <>
       {/* Rates Info Ribbon (Cinta informativa) */}
@@ -54,22 +90,46 @@ const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, a
         gap: '0.75rem', 
         marginBottom: '1.5rem', 
         flexWrap: 'wrap', 
-        alignItems: 'center',
-        padding: '0.6rem 1.2rem',
-        borderRadius: '1rem',
-        background: 'hsla(var(--foreground), 0.02)',
-        border: '1px solid var(--border)',
-        backdropFilter: 'blur(8px)'
+        alignItems: 'center'
       }}>
-        <div className="rate-pill-small" style={{ background: 'transparent', border: 'none', padding: 0 }}>
-          <span className="rate-label">Depositar pesos:</span>
-          <span className="rate-value">1 USD = {(arsBuyRate || 1000).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ARS</span>
+        {/* Depositar pesos pill */}
+        <div className="glass rate-pill-discrete" style={{ 
+          display: 'flex',
+          padding: '0.4rem 0.8rem',
+          borderRadius: '0.75rem',
+          alignItems: 'center',
+          gap: '0.5rem',
+          boxShadow: '0 2px 8px -1px rgba(0,0,0,0.05)',
+          background: 'var(--glass-bg)',
+          border: '1px solid var(--glass-border)'
+        }}>
+          <span className="rate-label" style={{ opacity: 0.4, fontWeight: 800, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: '0.05em' }}>Depositar pesos:</span>
+          <span className="rate-value" style={{ color: 'hsl(var(--primary))', fontFamily: "'JetBrains Mono', monospace", fontWeight: 850, fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            {(arsBuyRate || 1000).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ARS
+            {trend.buy === 'up' && <span style={{ color: 'hsl(var(--success))', fontSize: '0.7rem', lineHeight: 1 }}>▲</span>}
+            {trend.buy === 'down' && <span style={{ color: 'hsl(var(--error))', fontSize: '0.7rem', lineHeight: 1 }}>▼</span>}
+          </span>
         </div>
-        <div style={{ width: '1px', height: '12px', background: 'var(--border)', display: 'inline-block' }} className="hide-mobile" />
-        <div className="rate-pill-small" style={{ background: 'transparent', border: 'none', padding: 0 }}>
-          <span className="rate-label">Retirar pesos:</span>
-          <span className="rate-value">1 USD = {arsRate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ARS</span>
+
+        {/* Retirar pesos pill */}
+        <div className="glass rate-pill-discrete" style={{ 
+          display: 'flex',
+          padding: '0.4rem 0.8rem',
+          borderRadius: '0.75rem',
+          alignItems: 'center',
+          gap: '0.5rem',
+          boxShadow: '0 2px 8px -1px rgba(0,0,0,0.05)',
+          background: 'var(--glass-bg)',
+          border: '1px solid var(--glass-border)'
+        }}>
+          <span className="rate-label" style={{ opacity: 0.4, fontWeight: 800, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: '0.05em' }}>Retirar pesos:</span>
+          <span className="rate-value" style={{ color: 'hsl(var(--primary))', fontFamily: "'JetBrains Mono', monospace", fontWeight: 850, fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            {arsRate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ARS
+            {trend.sell === 'up' && <span style={{ color: 'hsl(var(--success))', fontSize: '0.7rem', lineHeight: 1 }}>▲</span>}
+            {trend.sell === 'down' && <span style={{ color: 'hsl(var(--error))', fontSize: '0.7rem', lineHeight: 1 }}>▼</span>}
+          </span>
         </div>
+
         {arsRateUpdatedAt && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.65rem', opacity: 0.4, fontWeight: 700, marginLeft: 'auto' }} className="hide-mobile-meta">
             <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'hsl(var(--success))', display: 'inline-block', animation: 'pulse-dot 2s infinite' }} />
@@ -221,7 +281,10 @@ const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, a
             flex-direction: column;
             align-items: flex-start !important;
             gap: 0.5rem !important;
-            padding: 0.8rem 1rem !important;
+          }
+          .rate-pill-discrete {
+            width: 100%;
+            justify-content: space-between;
           }
           .hide-mobile {
             display: none !important;
