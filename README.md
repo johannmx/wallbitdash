@@ -9,21 +9,34 @@ Un dashboard moderno y premium para visualizar tus activos y transacciones de **
 
 ## ✨ Características Principales
 
-- 💳 **Balance en Vivo**: Visualización en tiempo real de cuentas de Checking e Inversiones (Stocks).
+- 💳 **Balance en Vivo**: Visualización en tiempo real de cuentas de Checking e Inversiones (Stocks) con filtrado en dólares y rendimiento del 2.50% APY.
 - 🕒 **Sincronización Inteligente**: Middleware de Cache (Express) que refresca datos cada **5 min** de la API oficial. El frontend incluye un **Timer Visual** con barra de progreso que sincroniza localmente cada 5 min.
-- 🇦🇷 **Conversión a ARS (Real-time)**: Integración de "píldoras" de conversión a Pesos Argentinos (Dólar Oficial) en todas las tarjetas de saldo y gastos, facilitando el control financiero local.
+- 🇦🇷 **Conversión a ARS (Real-time)**: Integración de conversión a Pesos Argentinos en todas las tarjetas de saldo y gastos, facilitando el control financiero local.
 - 🔍 **Buscador Premium**: Historial de transacciones con buscador estilo "píldora" responsivo, con efectos interactivos y estados de foco mejorados.
 - 📉 **Analíticas Avanzadas**: Gráficos interactivos de depósitos mensuales (ARS) y distribución de gastos por categoría usando Recharts.
-- 💵 **Tasa en Tiempo Real**: Integración con DolarAPI para obtener el tipo de cambio oficial automáticamente.
-- 🌍 **Historial Completo**: Procesamiento optimizado de cientos de transacciones con filtros y búsqueda.
+- 💵 **Tasas Compra/Venta en Tiempo Real**: Integración directa con la API de Wallbit para obtener y mostrar en una cinta informativa responsiva las tasas reales de "Depositar pesos" (compra) y "Retirar pesos" (venta) con flechas indicadoras de tendencia de subida/bajada (▲/▼).
+- 🌍 **Historial Completo**: Sincronización automática de transacciones con paginación optimizada.
 - 🛍️ **Gastos Recientes**: Sección dedicada para analizar el consumo de los últimos 7 días con totales en USD.
-- 🎨 **Diseño Persistente**: Interfaz moderna con Glassmorphism, tipografía **Outfit** unificada para una estética premium, animaciones fluidas, y selector de temas (Light/Dark/System).
+- 🎨 **Diseño Persistente**: Interfaz responsiva con Glassmorphism, cinta informativa superior, tipografía **Outfit** unificada para una estética premium, y selector de temas (Light/Dark/System).
 - 🐳 **Docker-Ready**: Infraestructura completa con Docker Compose y builds optimizados en GHCR.
 
 ## 🏗️ Arquitectura
 
+El dashboard utiliza una arquitectura desacoplada estructurada en capas para optimizar el rendimiento y la seguridad:
+
+```mermaid
+graph TD
+    Usuario([Usuario]) -->|Navegador| Proxy[Nginx Reverse Proxy: Puerto 8080/80]
+    Proxy -->|Archivos Estáticos| FE[Frontend: React / Vite]
+    Proxy -->|Rutas /api/*| BE[Express Backend: Puerto 3001]
+    BE -->|Cron Job cada 5m| API_WB[Wallbit API]
+    BE -->|Sincroniza y Almacena| DB[(Persistencia: data.json)]
+    FE -->|Sincronización 5m / Refresh manual| BE
+    FE -->|Renderiza UI| UI[Cinta de Tasas Compra/Venta & Saldos]
+```
+
 - **Frontend**: React 19 + Vite (Servido via Nginx).
-- **Backend**: Node.js 20 (Express) con Cron Jobs para sincronización.
+- **Backend**: Node.js 20 (Express) con Cron Jobs para sincronización y persistencia de datos.
 - **Proxy**: Nginx como Reverse Proxy para unificar API y Frontend bajo un mismo puerto.
 - **CI/CD**: GitHub Actions para builds automatizados en GHCR. Soporta arquitecturas **amd64** y **arm64** (Oracle ARM, Raspberry Pi) mediante builds optimizados.
 
@@ -58,7 +71,7 @@ Para trabajar en el código base:
    ```bash
    WALLBIT_API_KEY=tu_api_key_aqui DASHBOARD_TOKEN=tu_token_aqui npm run dev
    ```
-   El frontend estará en `http://localhost:5173` y el backend en `http://localhost:3001`.
+   El frontend estará en `http://localhost:5173` and `http://localhost:3001`.
 
 ## 💾 Persistencia de Datos
 El proyecto utiliza un volumen de Docker para guardar el historial en un archivo `data.json`. Esto permite que tus datos no se pierdan si reinicias el contenedor y reduce drásticamente las llamadas innecesarias a la API de Wallbit.
