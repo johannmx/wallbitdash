@@ -4,7 +4,7 @@ import cron from 'node-cron';
 import fs from 'fs';
 import path from 'path';
 import { saveToPersistence as saveToPersistenceLib } from './persistence.js';
-import { fetchWallbitRate } from './dolar.js';
+import { fetchWallbitRate, fetchDolarApiRates } from './dolar.js';
 import { fileURLToPath } from 'url';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -24,7 +24,11 @@ const dataTemplate = {
     currency: "USD",
     transactions: []
   },
-  transactions: []
+  transactions: [],
+  arsRate: 1000,
+  arsBuyRate: 1000,
+  arsRateUpdatedAt: null,
+  dolarApi: { oficial: null, ccl: null }
 };
 
 const appInstance = express();
@@ -184,16 +188,28 @@ const fetchWithTimeout = async (url, options = {}) => {
   });
 };
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 const fetchAllTransactions = async (headers) => {
   let allTransactions = [];
   let page = 1;
   let hasMore = true;
+  let fetchFailed = false;
 
   while (hasMore) {
     try {
-      const res = await fetchWithTimeout(`${API_BASE}/transactions?page=${page}`, { headers, timeout: 15000 });
+      let res = await fetchWithTimeout(`${API_BASE}/transactions?page=${page}&limit=50`, { headers, timeout: 15000 });
+      
+      // If 429 rate limit hit, backoff and retry once
+      if (res.status === 429) {
+        console.warn(`⚠️ Wallbit transactions page ${page} returned 429, backing off 2.5s before retry...`);
+        await sleep(2500);
+        res = await fetchWithTimeout(`${API_BASE}/transactions?page=${page}&limit=50`, { headers, timeout: 15000 });
+      }
+
       if (!res.ok) {
         console.error(`❌ Wallbit transactions page ${page} returned status: ${res.status} ${res.statusText}`);
+        fetchFailed = true;
         break;
       }
 
@@ -204,17 +220,25 @@ const fetchAllTransactions = async (headers) => {
         hasMore = false;
       } else {
         allTransactions = [...allTransactions, ...txs];
-        if (txs.length < 10) {
+        if (txs.length < 50) {
           hasMore = false;
         } else {
           page++;
+          // Delay between pages to avoid bursting Wallbit rate limits
+          await sleep(400);
         }
       }
       if (page > 30) hasMore = false;
     } catch (err) {
       console.error(`❌ Wallbit transactions page ${page} error:`, err.message);
+      fetchFailed = true;
       break;
     }
+  }
+
+  // If page 1 failed completely, return null so caller preserves cached transactions
+  if (fetchFailed && allTransactions.length === 0) {
+    return null;
   }
 
   return allTransactions;
@@ -227,33 +251,46 @@ const fetchWallbitData = async () => {
     'X-API-Key': API_KEY,
     'Accept': 'application/json'
   };
-  console.log('🔄 Refreshing data from Wallbit API (concurrently)...');
+  console.log('🔄 Refreshing data from Wallbit API (sequenced & throttled)...');
 
   try {
-    // ⚡ Bolt: Execute independent external API calls concurrently to reduce overall latency (max-time instead of sum-time)
-    // and isolate errors using catch blocks to ensure partial updates succeed if one endpoint fails.
-    const [ratesResult, checkingRes, stocksRes, txsRaw] = await Promise.all([
-      fetchWallbitRate(API_KEY).catch(err => {
-        console.warn('⚠️ Wallbit rates fetch failed:', err.message);
-        return null;
-      }),
-      fetchWithTimeout(`${API_BASE}/balance/checking`, { headers }).catch(err => {
-        console.warn('⚠️ Wallbit checking balance fetch failed:', err.message);
-        return null;
-      }),
-      fetchWithTimeout(`${API_BASE}/balance/stocks`, { headers }).catch(err => {
-        console.warn('⚠️ Wallbit stocks balance fetch failed:', err.message);
-        return null;
-      }),
-      fetchAllTransactions(headers).catch(err => {
-        console.warn('⚠️ Wallbit transactions fetch failed:', err.message);
-        return null;
-      })
-    ]);
+    // Sequence external API requests with small delays to avoid triggering Wallbit burst rate limiting (429)
+    // 1. Process Checking Balance
+    const checkingRes = await fetchWithTimeout(`${API_BASE}/balance/checking`, { headers }).catch(err => {
+      console.warn('⚠️ Wallbit checking balance fetch failed:', err.message);
+      return null;
+    });
+    await sleep(350);
+
+    // 2. Process Stocks Balance
+    const stocksRes = await fetchWithTimeout(`${API_BASE}/balance/stocks`, { headers }).catch(err => {
+      console.warn('⚠️ Wallbit stocks balance fetch failed:', err.message);
+      return null;
+    });
+    await sleep(350);
+
+    // 3. Process Wallbit Exchange Rates
+    const ratesResult = await fetchWallbitRate(API_KEY).catch(err => {
+      console.warn('⚠️ Wallbit rates fetch failed:', err.message);
+      return null;
+    });
+    await sleep(400);
+
+    // 4. Process Transactions (with limit=50 and inter-page delay)
+    const txsRaw = await fetchAllTransactions(headers).catch(err => {
+      console.warn('⚠️ Wallbit transactions fetch failed:', err.message);
+      return null;
+    });
+
+    // 5. Process DolarApi Rates (independent external API)
+    const dolarResult = await fetchDolarApiRates().catch(err => {
+      console.warn('⚠️ DolarApi rates fetch failed:', err.message);
+      return null;
+    });
 
     let hasUpdates = false;
 
-    // 1. Process Checking Balance
+    // Apply Checking Balance
     if (checkingRes && checkingRes.ok) {
       const json = await checkingRes.json();
       const item = (json.data && json.data[0]) || { balance: "0.00", currency: "USD" };
@@ -261,7 +298,7 @@ const fetchWallbitData = async () => {
       hasUpdates = true;
     }
 
-    // 2. Process Stocks Balance
+    // Apply Stocks Balance
     if (stocksRes && stocksRes.ok) {
       const json = await stocksRes.json();
       const item = (json.data && json.data.find(asset => asset.symbol === 'USD')) || { shares: "0.00", symbol: "USD" };
@@ -273,16 +310,27 @@ const fetchWallbitData = async () => {
       hasUpdates = true;
     }
 
-    // 3. Process Rates
-    if (ratesResult) {
+    // Apply Rates (Only update when real rate data was obtained; NEVER overwrite with fallback on failure)
+    if (ratesResult && ratesResult.rate !== null && ratesResult.updatedAt !== null) {
       cache.arsRate = ratesResult.rate;
-      cache.arsBuyRate = ratesResult.buyRate;
+      cache.arsBuyRate = ratesResult.buyRate || cache.arsBuyRate;
       cache.arsRateUpdatedAt = ratesResult.updatedAt;
+      hasUpdates = true;
+    } else {
+      console.warn(`⚠️ Retaining existing Wallbit rate in cache: ${cache.arsRate} ARS`);
+    }
+
+    // Apply DolarApi Rates
+    if (dolarResult && (dolarResult.oficial !== null || dolarResult.ccl !== null)) {
+      cache.dolarApi = {
+        oficial: dolarResult.oficial ?? cache.dolarApi?.oficial ?? null,
+        ccl: dolarResult.ccl ?? cache.dolarApi?.ccl ?? null
+      };
       hasUpdates = true;
     }
 
-    // 4. Process Transactions
-    if (txsRaw) {
+    // Apply Transactions (Only overwrite cache if new transactions were actually fetched)
+    if (Array.isArray(txsRaw) && txsRaw.length > 0) {
       const mappedTxs = txsRaw.map(tx => {
         let desc = (tx.external_address || tx.comment || tx.description || '').trim();
         if (!desc) {
@@ -302,21 +350,19 @@ const fetchWallbitData = async () => {
         };
       });
 
-      // 5. Process Recent Expenses (Last 7 days)
+      // Process Recent Expenses (Last 7 days)
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setHours(0, 0, 0, 0);
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
       const expenseTypes = ['card_spent', 'pay_qr', 'internal_transfer', 'wire_transfer_out', 'withdrawal', 'withdrawal_local'];
-      
       const sevenDaysAgoTime = sevenDaysAgo.getTime();
       const recentExpenses = mappedTxs.filter(tx => {
          const isExpense = expenseTypes.includes(tx.type.toLowerCase()) || tx.type.toLowerCase().includes('spent');
          return tx.timestamp >= sevenDaysAgoTime && isExpense && (tx.status === 'COMPLETED' || tx.status === 'PENDING');
        }).sort((a,b) => b.timestamp - a.timestamp);
 
-      // Use the newly fetched rates result, or fallback to the already cached rate
-      const currentArsRate = (ratesResult && ratesResult.rate) || cache.arsRate || 1000;
+      const currentArsRate = cache.arsRate || (ratesResult && ratesResult.rate) || 1000;
       const totalInUSD = recentExpenses.reduce((sum, tx) => {
         let val = parseFloat(tx.amount);
         if (tx.currency === 'ARS') val /= currentArsRate;
@@ -333,6 +379,8 @@ const fetchWallbitData = async () => {
       };
       hasUpdates = true;
       console.log(`✅ Success: Aggregated ${mappedTxs.length} transactions (${recentExpenses.length} recent 7-day).`);
+    } else if (txsRaw === null) {
+      console.warn(`⚠️ Retaining existing transactions in cache (${cache.transactions?.length || 0} items) due to fetch error.`);
     }
 
     if (hasUpdates) {

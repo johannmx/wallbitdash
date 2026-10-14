@@ -227,9 +227,11 @@ h1, h2, h3, h4, .brand-font {
     padding: 0.75rem !important;
   }
 
-  /* Hide DolarPill on very small screens to prevent overflow */
+  /* Compact DolarPill on very small screens instead of hiding it */
   .dolar-pill {
-    display: none !important;
+    padding: 0.25rem 0.5rem !important;
+    gap: 0.35rem !important;
+    font-size: 0.65rem !important;
   }
 }
 
