@@ -32,5 +32,9 @@ export interface DashboardData {
   arsRate?: number;
   arsBuyRate?: number;
   arsRateUpdatedAt?: string;
+  dolarApi?: {
+    oficial: number | null;
+    ccl: number | null;
+  };
   _cacheInfo?: { lastUpdated: string };
 }

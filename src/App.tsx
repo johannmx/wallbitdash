@@ -202,7 +202,7 @@ function App() {
         </div>
         
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <DolarPill />
+          <DolarPill oficialRate={data.dolarApi?.oficial} cclRate={data.dolarApi?.ccl} />
           <div className="glass header-actions" style={{ 
             display: 'flex', 
             gap: '0.75rem', 

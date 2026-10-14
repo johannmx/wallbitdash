@@ -11,26 +11,36 @@ interface DolarRate {
 
 interface DolarPillProps {
   isHeader?: boolean;
+  oficialRate?: number | null;
+  cclRate?: number | null;
 }
 
-const DolarPill: FC<DolarPillProps> = ({ isHeader = false }) => {
-  const [oficial, setOficial] = useState<number | null>(null);
-  const [ccl, setCcl] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
+const DolarPill: FC<DolarPillProps> = ({ isHeader = false, oficialRate, cclRate }) => {
+  const [fetchedOficial, setFetchedOficial] = useState<number | null>(null);
+  const [fetchedCcl, setFetchedCcl] = useState<number | null>(null);
+  const [loading, setLoading] = useState(!oficialRate && !cclRate);
+
+  const oficial = oficialRate ?? fetchedOficial;
+  const ccl = cclRate ?? fetchedCcl;
 
   useEffect(() => {
+    // If rates already provided by props, skip client-side fetch unless missing
+    if (oficialRate && cclRate) return;
+
     const fetchRates = async () => {
       try {
-        const [oficialRes, cclRes] = await Promise.all([
+        const [oficialRes, cclRes] = await Promise.allSettled([
           fetch('https://dolarapi.com/v1/dolares/oficial', { signal: AbortSignal.timeout(5000) }),
           fetch('https://dolarapi.com/v1/dolares/contadoconliqui', { signal: AbortSignal.timeout(5000) })
         ]);
         
-        if (oficialRes.ok && cclRes.ok) {
-          const oficialData: DolarRate = await oficialRes.json();
-          const cclData: DolarRate = await cclRes.json();
-          setOficial(oficialData.venta);
-          setCcl(cclData.venta);
+        if (oficialRes.status === 'fulfilled' && oficialRes.value.ok) {
+          const oficialData: DolarRate = await oficialRes.value.json();
+          setFetchedOficial(oficialData.venta);
+        }
+        if (cclRes.status === 'fulfilled' && cclRes.value.ok) {
+          const cclData: DolarRate = await cclRes.value.json();
+          setFetchedCcl(cclData.venta);
         }
       } catch (error) {
         console.error('Error fetching dollar rates:', error);
@@ -40,12 +50,11 @@ const DolarPill: FC<DolarPillProps> = ({ isHeader = false }) => {
     };
 
     fetchRates();
-    // Refresh every 5 minutes
     const interval = setInterval(fetchRates, 300000);
     return () => clearInterval(interval);
-  }, []);
+  }, [oficialRate, cclRate]);
 
-  if (loading || (!oficial && !ccl)) return null;
+  if ((loading && !oficial && !ccl) || (!oficial && !ccl)) return null;
 
   return (
     <div className={!isHeader ? "glass dolar-pill" : "dolar-pill"} style={{ 
