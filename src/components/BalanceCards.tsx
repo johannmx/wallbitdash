@@ -54,7 +54,7 @@ const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, a
         if (sell === arsRate && buy === (arsBuyRate || 1000)) {
           return { sell: trendSell, buy: trendBuy };
         }
-      } catch (e) {
+      } catch {
         // ignore
       }
     }
