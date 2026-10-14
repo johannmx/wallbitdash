@@ -82,3 +82,8 @@
 **Vulnerability:** The application was logging `req.ip` directly to `console.warn` without sanitization. When Express is configured with `app.set('trust proxy', 1)`, the `req.ip` value is derived from the user-controlled `X-Forwarded-For` header. An attacker could inject Carriage Return (`\r`) and Line Feed (`\n`) characters into this header, allowing them to split the log entry and inject forged log lines (Log Injection / CRLF Injection).
 **Learning:** Any user-controlled input, including HTTP headers like `X-Forwarded-For` (which populates `req.ip` when proxy trust is enabled), provides a vector for attackers to manipulate server logs.
 **Prevention:** Always sanitize untrusted input, including `req.ip`, before writing it to logs. At a minimum, convert the input to a string and strip or encode newline characters (`[\r\n]`). For example, `String(req.ip || 'Unknown').replace(/[\r\n]/g, '')`.
+
+## 2026-07-15 - [Resolving Transitive Dependency Vulnerabilities without Breaking Changes]
+**Vulnerability:** The project contained transitive dependencies (`brace-expansion`, `nanoid`, `postcss`) with known vulnerabilities (DoS, infinite loop, info disclosure) reported by `npm audit`.
+**Learning:** Updating top-level packages to resolve transitive dependencies can introduce breaking changes or require significant refactoring. However, if the newer versions of the transitive dependencies are compatible, they can be forced without updating the root packages.
+**Prevention:** Use the `overrides` field in `package.json` to safely force secure versions of transitive dependencies, followed by `npm install --legacy-peer-deps` to update the lockfile. This mitigates the security risks while minimizing the chance of regressions.
