@@ -7,6 +7,7 @@ import AnalyticsCards from './components/AnalyticsCards';
 import RefreshTimer from './components/RefreshTimer';
 import Sidebar from './components/Sidebar';
 import BottomNav from './components/BottomNav';
+import DolarPill from './components/DolarPill';
 
 import { wallbitData } from './data/mockData';
 import type { DashboardData } from './types/dashboard';
@@ -200,14 +201,16 @@ function App() {
           </div>
         </div>
         
-        <div className="glass header-actions" style={{ 
-          display: 'flex', 
-          gap: '0.75rem', 
-          alignItems: 'center', 
-          padding: '0.5rem 0.75rem', 
-          borderRadius: '1.25rem',
-          flexShrink: 0
-        }}>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <DolarPill />
+          <div className="glass header-actions" style={{ 
+            display: 'flex', 
+            gap: '0.75rem', 
+            alignItems: 'center', 
+            padding: '0.5rem 0.75rem', 
+            borderRadius: '1.25rem',
+            flexShrink: 0
+          }}>
           {/* Action Group */}
           <div style={{ display: 'flex', gap: '0.25rem', paddingRight: '0.75rem', borderRight: '1px solid var(--border)' }}>
             <button 
@@ -244,6 +247,7 @@ function App() {
             <RefreshTimer onRefresh={handleRefresh} />
           </div>
         </div>
+      </div>
       </header>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
