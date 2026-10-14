@@ -190,23 +190,31 @@ const fetchAllTransactions = async (headers) => {
   let hasMore = true;
 
   while (hasMore) {
-    const res = await fetchWithTimeout(`${API_BASE}/transactions?page=${page}`, { headers, timeout: 15000 });
-    if (!res.ok) break;
+    try {
+      const res = await fetchWithTimeout(`${API_BASE}/transactions?page=${page}`, { headers, timeout: 15000 });
+      if (!res.ok) {
+        console.error(`❌ Wallbit transactions page ${page} returned status: ${res.status} ${res.statusText}`);
+        break;
+      }
 
-    const json = await res.json();
-    const txs = Array.isArray(json.data) ? json.data : (json.data?.data || []);
+      const json = await res.json();
+      const txs = Array.isArray(json.data) ? json.data : (json.data?.data || []);
 
-    if (txs.length === 0) {
-      hasMore = false;
-    } else {
-      allTransactions = [...allTransactions, ...txs];
-      if (txs.length < 10) {
+      if (txs.length === 0) {
         hasMore = false;
       } else {
-        page++;
+        allTransactions = [...allTransactions, ...txs];
+        if (txs.length < 10) {
+          hasMore = false;
+        } else {
+          page++;
+        }
       }
+      if (page > 30) hasMore = false;
+    } catch (err) {
+      console.error(`❌ Wallbit transactions page ${page} error:`, err.message);
+      break;
     }
-    if (page > 30) hasMore = false;
   }
 
   return allTransactions;
@@ -215,7 +223,10 @@ const fetchAllTransactions = async (headers) => {
 const fetchWallbitData = async () => {
   if (!API_KEY) return;
 
-  const headers = { 'X-API-Key': API_KEY };
+  const headers = { 
+    'X-API-Key': API_KEY,
+    'Accept': 'application/json'
+  };
   console.log('🔄 Refreshing data from Wallbit API (concurrently)...');
 
   try {
