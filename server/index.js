@@ -181,9 +181,13 @@ const saveToPersistence = () => {
 // --- Wallbit API Helpers ---
 
 const fetchWithTimeout = async (url, options = {}) => {
-  const { timeout = 10000, ...fetchOptions } = options;
+  const { timeout = 10000, headers = {}, ...fetchOptions } = options;
   return fetch(url, {
     ...fetchOptions,
+    headers: {
+      'User-Agent': 'WallbitDashboard/1.0 (Mozilla/5.0; compatible)',
+      ...headers
+    },
     signal: AbortSignal.timeout(timeout)
   });
 };
@@ -200,10 +204,13 @@ const fetchAllTransactions = async (headers) => {
     try {
       let res = await fetchWithTimeout(`${API_BASE}/transactions?page=${page}&limit=50`, { headers, timeout: 15000 });
       
-      // If 429 rate limit hit, backoff and retry once
+      // If 429 rate limit hit, backoff and retry once with Retry-After if available
       if (res.status === 429) {
-        console.warn(`⚠️ Wallbit transactions page ${page} returned 429, backing off 2.5s before retry...`);
-        await sleep(2500);
+        const retryAfter = res.headers?.get?.('retry-after') || '5';
+        const waitMs = Math.min(Math.max(parseInt(retryAfter, 10) || 5, 2), 60) * 1000;
+        const body = await res.text?.().catch(() => '') || '';
+        console.warn(`⚠️ Wallbit transactions page ${page} returned 429 (Retry-After: ${retryAfter}s). Body: ${body}. Backing off ${waitMs / 1000}s...`);
+        await sleep(waitMs);
         res = await fetchWithTimeout(`${API_BASE}/transactions?page=${page}&limit=50`, { headers, timeout: 15000 });
       }
 
@@ -225,7 +232,7 @@ const fetchAllTransactions = async (headers) => {
         } else {
           page++;
           // Delay between pages to avoid bursting Wallbit rate limits
-          await sleep(400);
+          await sleep(600);
         }
       }
       if (page > 30) hasMore = false;
@@ -249,38 +256,52 @@ const fetchWallbitData = async () => {
 
   const headers = { 
     'X-API-Key': API_KEY,
-    'Accept': 'application/json'
+    'Accept': 'application/json',
+    'User-Agent': 'WallbitDashboard/1.0 (Mozilla/5.0; compatible)'
   };
   console.log('🔄 Refreshing data from Wallbit API (sequenced & throttled)...');
 
   try {
-    // Sequence external API requests with small delays to avoid triggering Wallbit burst rate limiting (429)
+    // Sequence external API requests with conservative delays to avoid triggering Wallbit rate limits (429)
     // 1. Process Checking Balance
     const checkingRes = await fetchWithTimeout(`${API_BASE}/balance/checking`, { headers }).catch(err => {
       console.warn('⚠️ Wallbit checking balance fetch failed:', err.message);
       return null;
     });
-    await sleep(350);
+    if (checkingRes && checkingRes.status === 429) {
+      const retryAfter = checkingRes.headers?.get?.('retry-after') || 'N/A';
+      console.warn(`⚠️ Wallbit checking balance returned 429 (Retry-After: ${retryAfter})`);
+    }
+    await sleep(750);
 
     // 2. Process Stocks Balance
     const stocksRes = await fetchWithTimeout(`${API_BASE}/balance/stocks`, { headers }).catch(err => {
       console.warn('⚠️ Wallbit stocks balance fetch failed:', err.message);
       return null;
     });
-    await sleep(350);
+    if (stocksRes && stocksRes.status === 429) {
+      const retryAfter = stocksRes.headers?.get?.('retry-after') || 'N/A';
+      console.warn(`⚠️ Wallbit stocks balance returned 429 (Retry-After: ${retryAfter})`);
+    }
+    await sleep(750);
 
     // 3. Process Wallbit Exchange Rates
     const ratesResult = await fetchWallbitRate(API_KEY).catch(err => {
       console.warn('⚠️ Wallbit rates fetch failed:', err.message);
       return null;
     });
-    await sleep(400);
+    await sleep(750);
 
-    // 4. Process Transactions (with limit=50 and inter-page delay)
-    const txsRaw = await fetchAllTransactions(headers).catch(err => {
-      console.warn('⚠️ Wallbit transactions fetch failed:', err.message);
-      return null;
-    });
+    // 4. Process Transactions (abort if rate limited to allow cooldown)
+    let txsRaw = null;
+    if (ratesResult?.rateLimited || checkingRes?.status === 429 || stocksRes?.status === 429) {
+      console.warn('⚠️ Wallbit rate limit active. Postponing transactions fetch to allow cooldown.');
+    } else {
+      txsRaw = await fetchAllTransactions(headers).catch(err => {
+        console.warn('⚠️ Wallbit transactions fetch failed:', err.message);
+        return null;
+      });
+    }
 
     // 5. Process DolarApi Rates (independent external API)
     const dolarResult = await fetchDolarApiRates().catch(err => {
