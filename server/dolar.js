@@ -4,9 +4,15 @@ export const fetchWallbitRate = async (apiKey, fetchImpl = fetch) => {
   let rate = null;
   let buyRate = null;
   let updatedAt = null;
+  const headers = { 
+    'X-API-Key': apiKey, 
+    'Accept': 'application/json',
+    'User-Agent': 'WallbitDashboard/1.0 (Mozilla/5.0; compatible)'
+  };
+
   try {
     const resSell = await fetchImpl('https://api.wallbit.io/api/public/v1/rates?source_currency=USD&dest_currency=ARS', {
-      headers: { 'X-API-Key': apiKey, 'Accept': 'application/json' },
+      headers,
       signal: AbortSignal.timeout(6000)
     });
 
@@ -15,14 +21,17 @@ export const fetchWallbitRate = async (apiKey, fetchImpl = fetch) => {
       rate = json?.data?.rate ?? null;
       updatedAt = json?.data?.updated_at ?? null;
     } else if (resSell.status === 429) {
-      console.warn('⚠️ Wallbit sell rate returned status: 429');
+      const retryAfter = resSell.headers?.get?.('retry-after') || 'N/A';
+      const body = await resSell.text?.().catch(() => '') || '';
+      console.warn(`⚠️ Wallbit sell rate returned 429 (Retry-After: ${retryAfter}). Body: ${body}`);
+      return { rate: null, buyRate: null, updatedAt: null, rateLimited: true, retryAfter };
     }
 
     // Delay between requests to avoid burst rate limit
-    await sleep(350);
+    await sleep(750);
 
     const resBuy = await fetchImpl('https://api.wallbit.io/api/public/v1/rates?source_currency=ARS&dest_currency=USD', {
-      headers: { 'X-API-Key': apiKey, 'Accept': 'application/json' },
+      headers,
       signal: AbortSignal.timeout(6000)
     });
 
@@ -30,7 +39,8 @@ export const fetchWallbitRate = async (apiKey, fetchImpl = fetch) => {
       const json = await resBuy.json();
       buyRate = json?.data?.rate ?? null;
     } else if (resBuy.status === 429) {
-      console.warn('⚠️ Wallbit buy rate returned status: 429');
+      const retryAfter = resBuy.headers?.get?.('retry-after') || 'N/A';
+      console.warn(`⚠️ Wallbit buy rate returned 429 (Retry-After: ${retryAfter})`);
     }
 
     return { rate, buyRate, updatedAt };
