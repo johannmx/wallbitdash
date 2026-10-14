@@ -41,6 +41,11 @@ if (!DASHBOARD_TOKEN) {
   process.exit(1);
 }
 
+// 🛡️ Sentinel: Enforce high-entropy token warning at startup
+if (DASHBOARD_TOKEN.length < 16) {
+  console.warn('🔒 Security Warning: DASHBOARD_TOKEN is too short (< 16 characters). Use a longer, high-entropy token for better security.');
+}
+
 // Security Middlewares
 appInstance.use(helmet());
 
@@ -56,7 +61,10 @@ appInstance.use(globalLimiter);
 
 // Security Enhancement: Fail-closed approach for CORS configuration in production
 const defaultOrigins = process.env.NODE_ENV === 'production' ? [] : ['http://localhost:5173'];
-const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : defaultOrigins;
+// 🛡️ Sentinel: Trim origins to prevent configuration whitespace bugs from bypassing or breaking CORS policy
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) 
+  : defaultOrigins;
 appInstance.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl requests)
@@ -208,22 +216,42 @@ const fetchWallbitData = async () => {
   if (!API_KEY) return;
 
   const headers = { 'X-API-Key': API_KEY };
-  console.log('🔄 Refreshing data from Wallbit API...');
+  console.log('🔄 Refreshing data from Wallbit API (concurrently)...');
 
   try {
-    const { rate: arsRate, buyRate: arsBuyRate, updatedAt: arsRateUpdatedAt } = await fetchWallbitRate(API_KEY);
+    // ⚡ Bolt: Execute independent external API calls concurrently to reduce overall latency (max-time instead of sum-time)
+    // and isolate errors using catch blocks to ensure partial updates succeed if one endpoint fails.
+    const [ratesResult, checkingRes, stocksRes, txsRaw] = await Promise.all([
+      fetchWallbitRate(API_KEY).catch(err => {
+        console.warn('⚠️ Wallbit rates fetch failed:', err.message);
+        return null;
+      }),
+      fetchWithTimeout(`${API_BASE}/balance/checking`, { headers }).catch(err => {
+        console.warn('⚠️ Wallbit checking balance fetch failed:', err.message);
+        return null;
+      }),
+      fetchWithTimeout(`${API_BASE}/balance/stocks`, { headers }).catch(err => {
+        console.warn('⚠️ Wallbit stocks balance fetch failed:', err.message);
+        return null;
+      }),
+      fetchAllTransactions(headers).catch(err => {
+        console.warn('⚠️ Wallbit transactions fetch failed:', err.message);
+        return null;
+      })
+    ]);
 
-    // 1. Fetch Checking Balance
-    const checkingRes = await fetchWithTimeout(`${API_BASE}/balance/checking`, { headers });
-    if (checkingRes.ok) {
+    let hasUpdates = false;
+
+    // 1. Process Checking Balance
+    if (checkingRes && checkingRes.ok) {
       const json = await checkingRes.json();
       const item = (json.data && json.data[0]) || { balance: "0.00", currency: "USD" };
       cache.checking = { balance: item.balance, currency: item.currency };
+      hasUpdates = true;
     }
 
-    // 2. Fetch Stocks Balance
-    const stocksRes = await fetchWithTimeout(`${API_BASE}/balance/stocks`, { headers });
-    if (stocksRes.ok) {
+    // 2. Process Stocks Balance
+    if (stocksRes && stocksRes.ok) {
       const json = await stocksRes.json();
       const item = (json.data && json.data.find(asset => asset.symbol === 'USD')) || { shares: "0.00", symbol: "USD" };
       cache.stocks = { 
@@ -231,66 +259,75 @@ const fetchWallbitData = async () => {
         currency: item.symbol || item.currency || "USD",
         assets: json.data || [] 
       };
+      hasUpdates = true;
     }
 
-    // 3. Fetch ALL Transactions
-    const txsRaw = await fetchAllTransactions(headers);
-    
-    // 4. Map Transactions
-    const mappedTxs = txsRaw.map(tx => {
-      let desc = (tx.external_address || tx.comment || tx.description || '').trim();
-      if (!desc) {
-        if (tx.type === 'WITHDRAWAL_LOCAL') desc = 'Retiro local';
-        else if (tx.type === 'INVESTMENT_WITHDRAWAL') desc = 'Retiro de inversión';
-        else if (tx.type === 'INVESTMENT_DEPOSIT') desc = 'Depósito de inversión';
-      }
-      return {
-        uuid: tx.uuid,
-        type: tx.type,
-        amount: tx.source_amount || tx.amount,
-        currency: (tx.source_currency?.code || tx.currency || 'USD'),
-        status: tx.status,
-        date: (tx.created_at || tx.date).split('T')[0],
-        timestamp: new Date(tx.created_at || tx.date).getTime(),
-        description: desc
+    // 3. Process Rates
+    if (ratesResult) {
+      cache.arsRate = ratesResult.rate;
+      cache.arsBuyRate = ratesResult.buyRate;
+      cache.arsRateUpdatedAt = ratesResult.updatedAt;
+      hasUpdates = true;
+    }
+
+    // 4. Process Transactions
+    if (txsRaw) {
+      const mappedTxs = txsRaw.map(tx => {
+        let desc = (tx.external_address || tx.comment || tx.description || '').trim();
+        if (!desc) {
+          if (tx.type === 'WITHDRAWAL_LOCAL') desc = 'Retiro local';
+          else if (tx.type === 'INVESTMENT_WITHDRAWAL') desc = 'Retiro de inversión';
+          else if (tx.type === 'INVESTMENT_DEPOSIT') desc = 'Depósito de inversión';
+        }
+        return {
+          uuid: tx.uuid,
+          type: tx.type,
+          amount: tx.source_amount || tx.amount,
+          currency: (tx.source_currency?.code || tx.currency || 'USD'),
+          status: tx.status,
+          date: (tx.created_at || tx.date).split('T')[0],
+          timestamp: new Date(tx.created_at || tx.date).getTime(),
+          description: desc
+        };
+      });
+
+      // 5. Process Recent Expenses (Last 7 days)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setHours(0, 0, 0, 0);
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      const expenseTypes = ['card_spent', 'pay_qr', 'internal_transfer', 'wire_transfer_out', 'withdrawal', 'withdrawal_local'];
+      
+      const sevenDaysAgoTime = sevenDaysAgo.getTime();
+      const recentExpenses = mappedTxs.filter(tx => {
+         const isExpense = expenseTypes.includes(tx.type.toLowerCase()) || tx.type.toLowerCase().includes('spent');
+         return tx.timestamp >= sevenDaysAgoTime && isExpense && (tx.status === 'COMPLETED' || tx.status === 'PENDING');
+       }).sort((a,b) => b.timestamp - a.timestamp);
+
+      // Use the newly fetched rates result, or fallback to the already cached rate
+      const currentArsRate = (ratesResult && ratesResult.rate) || cache.arsRate || 1000;
+      const totalInUSD = recentExpenses.reduce((sum, tx) => {
+        let val = parseFloat(tx.amount);
+        if (tx.currency === 'ARS') val /= currentArsRate;
+        return sum + val;
+      }, 0).toFixed(2);
+
+      cache.transactions = mappedTxs;
+      cache.recentExpenses = {
+        title: "Gastos últimos 7 días",
+        subtitle: "Consumo total (USD)",
+        totalSpent: totalInUSD,
+        currency: "USD",
+        transactions: recentExpenses
       };
-    });
+      hasUpdates = true;
+      console.log(`✅ Success: Aggregated ${mappedTxs.length} transactions (${recentExpenses.length} recent 7-day).`);
+    }
 
-    // 5. Process Recent Expenses (Last 7 days)
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setHours(0, 0, 0, 0);
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-    const expenseTypes = ['card_spent', 'pay_qr', 'internal_transfer', 'wire_transfer_out', 'withdrawal', 'withdrawal_local'];
-    
-    const sevenDaysAgoTime = sevenDaysAgo.getTime();
-    const recentExpenses = mappedTxs.filter(tx => {
-       const isExpense = expenseTypes.includes(tx.type.toLowerCase()) || tx.type.toLowerCase().includes('spent');
-       return tx.timestamp >= sevenDaysAgoTime && isExpense && (tx.status === 'COMPLETED' || tx.status === 'PENDING');
-     }).sort((a,b) => b.timestamp - a.timestamp);
-
-    const totalInUSD = recentExpenses.reduce((sum, tx) => {
-      let val = parseFloat(tx.amount);
-      if (tx.currency === 'ARS') val /= arsRate;
-      return sum + val;
-    }, 0).toFixed(2);
-
-    // 6. Update Cache
-    cache.arsRate = arsRate;
-    cache.arsBuyRate = arsBuyRate;
-    cache.arsRateUpdatedAt = arsRateUpdatedAt;
-    cache.transactions = mappedTxs;
-    cache.recentExpenses = {
-      title: "Gastos últimos 7 días",
-      subtitle: "Consumo total (USD)",
-      totalSpent: totalInUSD,
-      currency: "USD",
-      transactions: recentExpenses
-    };
-    cache.lastUpdated = new Date().toISOString();
-
-    saveToPersistence();
-    console.log(`✅ Success: Aggregated ${mappedTxs.length} transactions (${recentExpenses.length} recent 7-day).`);
+    if (hasUpdates) {
+      cache.lastUpdated = new Date().toISOString();
+      saveToPersistence();
+    }
 
   } catch (error) {
     console.error('❌ Wallbit API Fetch Failed:', error.message);
@@ -334,7 +371,9 @@ appInstance.use((req, res) => {
 // Security Enhancement: Global error handler to prevent stack trace leaks
 // Ensures errors return secure JSON responses instead of exposing internals via HTML
 appInstance.use((err, req, res, next) => {
-  console.error('🚨 Error caught by global handler:', err.message);
+  // 🛡️ Sentinel: Sanitize error messages before logging to mitigate CRLF log injection risks
+  const safeErrMessage = String(err.message || '').replace(/[\r\n]/g, '');
+  console.error('🚨 Error caught by global handler:', safeErrMessage);
 
   if (err.message === 'CORS blocked') {
     return res.status(403).json({ error: 'Forbidden: CORS policy violation' });

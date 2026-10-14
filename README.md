@@ -9,7 +9,7 @@ Un dashboard moderno y premium para visualizar tus activos y transacciones de **
 
 ## ✨ Características Principales
 
-- 💳 **Balance en Vivo**: Visualización en tiempo real de cuentas de Checking e Inversiones (Stocks) con filtrado en dólares y rendimiento del 2.50% APY.
+- 💳 **Balance en Vivo**: Visualización en tiempo real de cuentas de Checking e Inversiones (Stocks) con filtrado en dólares, rendimiento del 3.50% APY y estimación de ganancia mensual calculada.
 - 🕒 **Sincronización Inteligente**: Middleware de Cache (Express) que refresca datos cada **5 min** de la API oficial. El frontend incluye un **Timer Visual** con barra de progreso que sincroniza localmente cada 5 min.
 - 🇦🇷 **Conversión a ARS (Real-time)**: Integración de conversión a Pesos Argentinos en todas las tarjetas de saldo y gastos, facilitando el control financiero local.
 - 🔍 **Buscador Premium**: Historial de transacciones con buscador estilo "píldora" responsivo, con efectos interactivos y estados de foco mejorados.
@@ -71,7 +71,7 @@ Para trabajar en el código base:
    ```bash
    WALLBIT_API_KEY=tu_api_key_aqui DASHBOARD_TOKEN=tu_token_aqui npm run dev
    ```
-   El frontend estará en `http://localhost:5173` and `http://localhost:3001`.
+   El frontend estará en `http://localhost:5173` y el backend en `http://localhost:3001`.
 
 ## 💾 Persistencia de Datos
 El proyecto utiliza un volumen de Docker para guardar el historial en un archivo `data.json`. Esto permite que tus datos no se pierdan si reinicias el contenedor y reduce drásticamente las llamadas innecesarias a la API de Wallbit.

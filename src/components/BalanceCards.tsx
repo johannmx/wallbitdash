@@ -202,8 +202,30 @@ const BalanceCards: FC<BalanceCardsProps> = ({ checking, stocks, showBalances, a
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <h3 style={{ opacity: 0.3, fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', margin: 0 }}>Investment Portfolio</h3>
-            <div style={{ color: 'hsl(var(--success))', fontSize: '0.85rem', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              2.50% APY
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <div style={{ color: 'hsl(var(--success))', fontSize: '0.85rem', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                3.50% APY
+              </div>
+              <span style={{ opacity: 0.25, fontSize: '0.85rem' }}>•</span>
+              <div 
+                title="Ganancia mensual estimada calculada al 3.50% APY"
+                style={{ 
+                  color: 'hsl(var(--success))', 
+                  fontSize: '0.8rem', 
+                  fontWeight: 700, 
+                  fontFamily: "'JetBrains Mono', monospace", 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.3rem',
+                  background: 'hsla(var(--success), 0.1)',
+                  padding: '0.2rem 0.55rem',
+                  borderRadius: '0.5rem',
+                  border: '1px solid hsla(var(--success), 0.2)'
+                }}
+              >
+                <span style={{ opacity: 0.7, fontWeight: 600, fontSize: '0.7rem' }}>EST.:</span>
+                <span>{showBalances ? `+$${(((parseFloat(stocks.balance) || 0) * 0.035) / 12).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${stocks.currency || 'USD'}/mes` : '••••'}</span>
+              </div>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', flexWrap: 'wrap' }}>
